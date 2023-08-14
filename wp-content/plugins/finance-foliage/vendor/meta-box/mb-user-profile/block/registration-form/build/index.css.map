@@ -1,0 +1,1 @@
+{"version":3,"file":"index.css","mappings":";;;AAAA;EACC;EACA;AACD,C","sources":["webpack:///./block/registration-form/src/editor.scss"],"sourcesContent":[".mbup-block .components-panel__row {\n\tflex-direction: column;\n\talign-items: stretch;\n}"],"names":[],"sourceRoot":""}

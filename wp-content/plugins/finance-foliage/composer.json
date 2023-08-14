@@ -1,0 +1,41 @@
+{
+  "name": "themeperch/finance-foliage",
+  "description": "Financial company fields agent binary tree and their financial benefit generator",
+  "autoload": {                
+      "psr-4": {
+          "FinanceFoliage\\": "src/"
+      },
+      "files": [
+        "vendor/meta-box/mb-user-profile/mb-user-profile.php",        
+        "vendor/meta-box/mb-settings-page/mb-settings-page.php",
+        "inc/functions.php"
+      ]
+  },
+  "authors": [
+      {
+          "name": "Themeperch",
+          "email": "themeperch@gmail.com"
+      }
+  ],
+  "repositories": [ {
+      "type": "composer",
+      "url": "https://packages.metabox.io/8820e8cb87c4b1591a3b8b4456b2197f"
+  }],
+  "require": {
+    "meta-box/mb-user-profile": "dev-master",
+    "meta-box/mb-settings-page": "dev-master"       
+  },
+  "extra": {
+    "installer-paths": {
+      "vendor/meta-box/{$name}": [
+        "vendor:wpackagist-plugin", 
+        "vendor:meta-box"
+      ]
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "composer/installers": true
+    }
+  }
+}
