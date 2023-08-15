@@ -27,15 +27,15 @@ function getrandomstring($length) {
 }
 
 function get_all_agents_users(){
-    //global $wpdb;
-    $query_arg = array(
-        'role' => 'finance_agent',
-        'orderby' => 'display_name', 
-        'order' => 'ASC'
-        );
-    $user_query = new WP_User_Query($query_arg);
-    
-    $finance_agents = $user_query->get_results();
-    //pprint($user_query->query_fields);
-    //pprint($user_query->query_from);
+    $agents_options = [];
+    global $wpdb;
+
+    $referral_nodes = $wpdb->get_results('SELECT aid,user_name FROM ' . $wpdb->prefix . 'alliance' . ' WHERE left_node IS NULL OR  right_node IS NULL ORDER BY user_name ASC');
+    if (!empty($referral_nodes)) {
+        foreach ($referral_nodes as $node) {
+            $agents_options[$node->aid] = $node->user_name . '(' . $node->aid . ')';
+        }
+    }
+  
+    return $agents_options;
 }

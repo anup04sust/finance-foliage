@@ -189,7 +189,13 @@ class FfSetups {
                 'finance_agent', //  System name of the role.
                 __('Finance Agent'), // Display name of the role.
                 array(
-                    'read' => true,
+                    'read' => false,
+                    'create_posts' => false,
+                    'edit_posts' => false,
+                    'edit_others_posts' => false,
+                    'publish_posts' => false,
+                    'manage_categories' => false,
+                    'manage_options' => false, // Most plugi
                 )
         );
     }

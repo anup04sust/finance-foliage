@@ -93,7 +93,19 @@
             theme: 'bootstrap4'
         });
     }
+    //Add new agent
     if ($('#form-add-new-agent').length > 0) {
+        function resetForm() {
+            $('#agent-referral').append('<option value="' + $('#agent-sl').val().trim() + '">' + $('#agent-name').val() + '(' + $('#agent-sl').val().trim() + ')</option>');
+            $('#agent-referral').val(0);
+            $('#agent-name').val('');
+            $('#agent-sl').val('');
+            $('#form-add-new-agent-submit').removeClass('disabled');
+            $('#agent-referral').select2({
+                theme: 'bootstrap4'
+            });
+        }
+
         $('#created_at').datetimepicker({
             format: 'YYYY-MM-DD'
         });
@@ -101,34 +113,93 @@
         message.html('').fadeOut();
         $('#form-add-new-agent').on('submit', function (e) {
             e.preventDefault();
-            var button = $('#form-add-new-agent input[type="submit"]');
+            message.text('').fadeOut();
+            var button = $('#form-add-new-agent-submit');
             button.addClass('disabled');
             var formData = $(this).serialize();
+
             var agentName = $('#agent-name').val();
             var ref = $('#agent-referral').val();
             if (ref === '0') {
                 $('#frontline-wrap').fadeIn('slow');
-                
+
                 if ($('#ref-frontline').is(":visible") && $('#ref-frontline').is(":checked")) {
-                   message.fadeOut('slow').html('');
+                    message.fadeOut('slow').html('');
                     $.ajax({
                         type: "POST",
                         data: formData,
                         url: financeFoliage.ajaxurl,
                         success: function (data)
                         {
-                            //alert(data);
-                            console.log('success', data);
+                            message.removeClass('callout-danger').addClass('callout-success');
+                            message.text(agentName + ' added in system.');
+                            message.fadeIn('slow');
+                            resetForm();
                         }
                     });
                 } else {
                     message.addClass('callout-danger');
                     message.text('Please select Referral ID or Plase check Front Line agent');
                     message.fadeIn('slow');
+                    button.removeClass('disabled');
                 }
+            } else {
+                $.ajax({
+                    type: "POST",
+                    data: formData,
+                    url: financeFoliage.ajaxurl,
+                    success: function (data)
+                    {
+                        //alert(data);
+                        message.removeClass('callout-danger').addClass('callout-success');
+                        message.text(agentName + ' added in system');
+                        message.fadeIn('slow');
+
+                        resetForm();
+                    }
+                });
             }
-            button.removeClass('disabled');
+
             return false;
+        });
+        $('#agent-referral').on('change', function () {
+            var ref = $(this).val();
+            if (ref !== '0') {
+                $.ajax({
+                    type: "POST",
+                    data: {'referral_id': ref, 'action': 'verify_referral'},
+                    url: financeFoliage.ajaxurl,
+                    success: function (response)
+                    {
+                        var returnedData = JSON.parse(response);
+
+                        if (returnedData.status === 200) {
+                            console.log('returnedData.status', returnedData.status);
+                            if (returnedData.left_node === true) {
+                                console.log('returnedData.left_node', returnedData.left_node);
+                                $('#ref-wings-left').prop('disabled', true);
+                                $('#ref-wings-right').prop('checked', true);
+                            } else if (returnedData.right_node === true) {
+                                console.log('returnedData.right_node', returnedData.right_node);
+                                $('#ref-wings-right').prop('disabled', true);
+                                $('#ref-wings-left').prop('checked', true);
+                            } else {
+                                console.log('returnedData', returnedData);
+                                $('#ref-wings-left').prop('checked', true);
+                                $('#ref-wings-right').prop('checked', false);
+                                $('#ref-wings-left').prop('disabled', false);
+                                $('#ref-wings-right').prop('disabled', false);
+                            }
+                        }
+
+                    }
+                });
+            } else {
+                $('#ref-wings-left').prop('checked', true);
+                $('#ref-wings-right').prop('checked', false);
+                $('#ref-wings-left').prop('disabled', false);
+                $('#ref-wings-right').prop('disabled', false);
+            }
         });
     }
 

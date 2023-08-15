@@ -20,8 +20,10 @@ class Settings {
     public function __construct() {
         $this->settings = get_option('finance_foliage_settings');
         $this->addUserRestrictions();
-        add_action('wp_head', [$this, 'redirect'], 0);
+        
+        add_action('wp_head', [$this, 'redirect']);
         add_action('wp_enqueue_scripts', [$this, 'addScripts']);
+
     }
 
     private function addUserRestrictions() {
@@ -30,16 +32,19 @@ class Settings {
         }
     }
 
-    public function redirect($param) {
+    public function redirect() {
+       //$user = wp_get_current_user();
         $account_page = get_permalink($this->settings['user_account_page_id']);
-        if (!is_user_logged_in() && !is_page($this->settings['user_account_page_id']) && !is_admin()) {
-            wp_redirect($account_page);
-            // die
+        if (!current_user_can('manage_options')) {
+            if (!is_user_logged_in() && !is_page($this->settings['user_account_page_id'])) {
+                wp_redirect($account_page);
+                wp_die('Unexpected error, please contact with administrator!!');
+            }
         }
     }
 
     public function addScripts() {
-       
+
         wp_enqueue_script(
                 'chart.js',
                 FINANCE_FOLIGE_DIR_URL . '/assets/chart.js/Chart.bundle.min.js',
@@ -92,11 +97,11 @@ class Settings {
         wp_enqueue_script(
                 'ff-dashboard-script',
                 FINANCE_FOLIGE_DIR_URL . '/assets/js/ff-dashboard.js',
-                array('jquery', 'chart.js', 'dataTables.js', 'select2.js','moment.js'),
+                array('jquery', 'chart.js', 'dataTables.js', 'select2.js', 'moment.js'),
                 FINANCE_FOLIGE_VER,
                 true
         );
-         wp_localize_script('ff-dashboard-script', 'financeFoliage',
+        wp_localize_script('ff-dashboard-script', 'financeFoliage',
                 array(
                     'ajaxurl' => admin_url('admin-ajax.php'),
                 )
@@ -106,7 +111,5 @@ class Settings {
         wp_enqueue_style('ff-select2bs-style', FINANCE_FOLIGE_DIR_URL . '/assets/select2-bootstrap4-theme/select2-bootstrap4.min.css', array(), FINANCE_FOLIGE_VER);
         wp_enqueue_style('ff-daterangepicker-style', FINANCE_FOLIGE_DIR_URL . '/assets/daterangepicker/daterangepicker.css', array(), FINANCE_FOLIGE_VER);
         wp_enqueue_style('ff-tempusdominus-style', FINANCE_FOLIGE_DIR_URL . '/assets/tempusdominus/css/tempusdominus-bootstrap-4.min.css', array(), FINANCE_FOLIGE_VER);
-
-
     }
 }
