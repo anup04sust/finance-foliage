@@ -47,7 +47,7 @@
                                     <select name="referral" class="form-control select2bs4" id="agent-referral" tabindex="1">
                                         <option value="0">Select Referral</option>
                                         <?php
-                                        $user_options = get_all_agents_users();
+                                        $user_options = ff_get_referral_agents();
                                         foreach ($user_options as $value => $name) {
                                             echo sprintf('<option value="%s">%s</option>', $value, $name);
                                         }

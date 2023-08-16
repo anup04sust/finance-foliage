@@ -104,6 +104,7 @@
             $('#agent-referral').select2({
                 theme: 'bootstrap4'
             });
+            $('#frontline-wrap').fadeOut();
         }
 
         $('#created_at').datetimepicker({

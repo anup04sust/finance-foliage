@@ -56,6 +56,9 @@ class Agents {
 
         $user_id = username_exists($user_data['user_login']);
         if (!$user_id && false == email_exists($user_data['email'])) {
+            if($this->referralHandCheck($user_data)){
+                return array('status' => false, 'msg' => __('Referral hand alredy fill, please check other hand'));
+            }
             $random_password = wp_generate_password();
             $user_id = wp_create_user($user_data['user_login'], $random_password, $user_data['email']);
             $user = get_user_by('ID', $user_id);
@@ -161,5 +164,20 @@ class Agents {
             );
         }
         wp_die();
+    }
+    private function referralHandCheck($user_data) {
+        if(empty($user_data['referral'])){
+            return false;
+        }
+        global $wpdb;
+        $referral_data = $wpdb->get_row('SELECT left_node,right_node FROM ' . $this->tableName . ' WHERE  aid=' . $user_data['referral']);
+        if($user_data['wing']==='L' && !empty($referral_data->left_node)){
+            return true;
+        }
+        if($user_data['wing']==='R' && !empty($referral_data->right_node)){
+            return true;
+        }
+        
+        return false;
     }
 }

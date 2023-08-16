@@ -36,6 +36,12 @@ class Shortcodes {
         if (is_page($this->settings['agentnode_addnew_page_id'])) {
             $content = $this->addAgent();
         }
+        if (is_page($this->settings['agentnode_single_page_id'])) {
+            $content = $this->viewAgent();
+        }
+        if (is_page($this->settings['settings_page_id'])) {
+            $content = $this->optionsSetting();
+        }
         return $content;
     }
 
@@ -66,6 +72,23 @@ class Shortcodes {
     private function addAgent() {
         ob_start();
         include_once FINANCE_FOLIGE_DIR . '/views/add-agent.php';
+        return ob_get_clean();
+    }
+
+    private function viewAgent() {
+        ob_start();
+        $view = !empty($_GET['view']) ? esc_attr($_GET['view']) : null;
+        if (!empty($view) && $view === 'tree') {
+            include_once FINANCE_FOLIGE_DIR . '/views/agent-tree-view.php';
+        } else if (!empty($view) && $view === 'info') {
+            include_once FINANCE_FOLIGE_DIR . '/views/agent-info-view.php';
+        }
+        return ob_get_clean();
+    }
+
+    private function optionsSetting() {
+        ob_start();
+        include_once FINANCE_FOLIGE_DIR . '/views/settings.php';
         return ob_get_clean();
     }
 }

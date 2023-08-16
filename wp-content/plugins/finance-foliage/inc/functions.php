@@ -5,7 +5,7 @@
  * Each line should be prefixed with  * 
  */
 
-function getrandomstring($length) {
+function ff_getrandomstring($length) {
 
        global $template;
        settype($template, "string");
@@ -26,7 +26,7 @@ function getrandomstring($length) {
        return $rndstring; 
 }
 
-function get_all_agents_users(){
+function ff_get_referral_agents(){
     $agents_options = [];
     global $wpdb;
 
@@ -38,4 +38,7 @@ function get_all_agents_users(){
     }
   
     return $agents_options;
+}
+function ff_get_agaent_level($agent_info){
+    $finance_foliage_options = get_option('finance_foliage_levels');
 }
