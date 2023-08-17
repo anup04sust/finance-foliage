@@ -39,31 +39,47 @@ define('FINANCE_FOLIGE_VER', '1.0.0');
 if (!defined('RWMB_VER')) {
     require __DIR__ . '/vendor/wpmetabox/meta-box/meta-box.php';
 }
-define('FINANCE_FOLIGE_DIR', __DIR__ );
-define('FINANCE_FOLIGE_DIR_URL', plugin_dir_url(__FILE__) );
+define('FINANCE_FOLIGE_DIR', __DIR__);
+define('FINANCE_FOLIGE_DIR_URL', plugin_dir_url(__FILE__));
+
 //Debug custom function
-function pprint($data){
+function pprint($data) {
     echo '<pre>';
     print_r($data);
     echo '</pre>';
 }
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/inc/install/FfSetups.php';
-
 
 if (!function_exists('fincance_foliage_init')):
-    
+    require_once __DIR__ . '/vendor/autoload.php';
+    require_once __DIR__ . '/inc/install/FfSetups.php';
     register_activation_hook(__FILE__, 'fincance_foliage_activate');
-    add_action('init', 'fincance_foliage_init',1);
-    
+
+    add_action('init', 'fincance_foliage_init', 1);
+
     function fincance_foliage_init() {
-       new FinanceFoliage\Loader;
-       $settings = get_option('finance_foliage_settings');
-       //pprint($settings );
+        new FinanceFoliage\Loader;
+        $settings = get_option('finance_foliage_settings');
+        //pprint($settings );
+  
+        $user = wp_get_current_user();
+        $actual_link = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+        $account_page = get_permalink($settings['user_account_page_id']);
+
+        if (!is_user_logged_in() && $actual_link !== $account_page) {
+
+            wp_safe_redirect($account_page);
+            exit();
+            wp_die('Unexpected error, please contact with administrator!!');
+        }
     }
-    function fincance_foliage_activate(){
+
+    function fincance_foliage_activate() {
         $install = new FfSetups();
         $install->init();
     }
+
+
+
+
 
 endif;

@@ -20,10 +20,9 @@ class Settings {
     public function __construct() {
         $this->settings = get_option('finance_foliage_settings');
         $this->addUserRestrictions();
-        
-        add_action('wp_head', [$this, 'redirect'],0);
-        add_action('wp_enqueue_scripts', [$this, 'addScripts']);
 
+        add_action('init', [$this, 'redirect'], 0);
+        add_action('wp_enqueue_scripts', [$this, 'addScripts']);
     }
 
     private function addUserRestrictions() {
@@ -33,15 +32,15 @@ class Settings {
     }
 
     public function redirect() {
-       $user = wp_get_current_user();
-      
+        $user = wp_get_current_user();
+
         $account_page = get_permalink($this->settings['user_account_page_id']);
-        if (!current_user_can('manage_options')) {
-            if (empty($user->ID) && !is_page($this->settings['user_account_page_id'])) {
-                wp_redirect($account_page);
-              
-               wp_die('Unexpected error, please contact with administrator!!');
-            }
+        pprint($user->ID);
+        if (empty($user->ID) && !is_page($this->settings['user_account_page_id'])) {
+            
+            wp_redirect($account_page);
+
+            wp_die('Unexpected error, please contact with administrator!!');
         }
     }
 
