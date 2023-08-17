@@ -42,6 +42,9 @@ class Shortcodes {
         if (is_page($this->settings['settings_page_id'])) {
             $content = $this->optionsSetting();
         }
+        if (is_page($this->settings['finance_report_page_id'])) {
+            $content = $this->financeReports();
+        }
         return $content;
     }
 
@@ -89,6 +92,11 @@ class Shortcodes {
     private function optionsSetting() {
         ob_start();
         include_once FINANCE_FOLIGE_DIR . '/views/settings.php';
+        return ob_get_clean();
+    }
+    private function financeReports() {
+        ob_start();
+        include_once FINANCE_FOLIGE_DIR . '/views/finance-report.php';
         return ob_get_clean();
     }
 }

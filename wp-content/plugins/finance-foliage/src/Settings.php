@@ -113,5 +113,6 @@ class Settings {
         wp_enqueue_style('ff-select2bs-style', FINANCE_FOLIGE_DIR_URL . '/assets/select2-bootstrap4-theme/select2-bootstrap4.min.css', array(), FINANCE_FOLIGE_VER);
         wp_enqueue_style('ff-daterangepicker-style', FINANCE_FOLIGE_DIR_URL . '/assets/daterangepicker/daterangepicker.css', array(), FINANCE_FOLIGE_VER);
         wp_enqueue_style('ff-tempusdominus-style', FINANCE_FOLIGE_DIR_URL . '/assets/tempusdominus/css/tempusdominus-bootstrap-4.min.css', array(), FINANCE_FOLIGE_VER);
+        wp_enqueue_style('ff-plugin-style', FINANCE_FOLIGE_DIR_URL . '/assets/css/ff-plugin-style.css', array(), FINANCE_FOLIGE_VER);
     }
 }

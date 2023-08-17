@@ -1,11 +1,28 @@
 <?php
 $agent_id = esc_attr($_GET['node']);
+$foliage_settings = get_option('finance_foliage_settings');
+$agent_url = get_permalink($foliage_settings['agentnode_single_page_id']);
 if (!empty($agent_id)):
     global $wpdb;
     ?>
     <div class="row">
         <div class="col-sm-12">
-            Hello
+            <div class="small-box bg-success">
+              <div class="inner">
+                      <div class="ff-tree-wrap  d-flex justify-content-center">
+                          <ul>
+                               <?php echo ff_get_agents_tree($agent_id);?>
+                          </ul>
+                      </div>
+               
+              </div>
+              <div class="icon">
+                <i class="ion ion-stats-bars"></i>
+              </div>
+              <a href="#" class="small-box-footer">
+                Load More <i class="fas fa-arrow-circle-right"></i>
+              </a>
+            </div>
         </div>
     </div>
     <?php
@@ -60,14 +77,14 @@ else:
                             </div>
                             <!-- /.row -->
                             <div class="d-flex justify-content-between pt-0">
-                            <a href="" class="btn btn-sm btn-outline-secondary">Tree View</a>
-                            <a href="" class="btn btn-sm btn-outline-info">Info View</a>
+                            <a href="<?php echo $agent_url.'?view=tree&node='.$agent->ID?>" class="btn btn-sm btn-outline-secondary"> <i class="fas fa-project-diagram mr-2"></i>View tree</a>
+                            <a href="<?php echo $agent_url.'?view=info&node='.$agent->ID?>" class="btn btn-sm btn-outline-info"><i class="fas fa-info mr-2"></i> View info</a>
                         </div>
                         </div>
-                        
+                        <?php $level = ff_get_agaent_level($agent);?>
                         <div class="ribbon-wrapper ribbon-lg">
                         <div class="ribbon bg-info">
-                          Level <?php ff_get_agaent_level($agent); ?>
+                          Level <?php echo @$level['level']; ?>
                         </div>
                       </div> 
                     </div>
@@ -76,6 +93,7 @@ else:
                 <?php
             endforeach;
         endif;
+        
         ?>
     </div>
     <?php endif; ?>
