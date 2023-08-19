@@ -40,35 +40,35 @@ $agentnode_edit_url = get_permalink($foliage_settings['agentnode_addnew_page_id'
                         global $wpdb;
                         $table_name = $wpdb->prefix . 'alliance';
                         $agents = $wpdb->get_results('SELECT * FROM ' . $table_name . ' ORDER BY ID ASC');
-                       
-                        if (!empty($agents)):
-                            
-                            foreach ($agents as $agent):
-                            ?>
-                            <tr>
-                                <td><?php echo $agent->aid; ?></td>
 
-                                <td><?php echo $agent->user_name; ?></td>
-                                <td><?php echo $agent->left_node_count; ?></td>
-                                <td><?php echo $agent->right_node_count; ?></td>
-                                 <td><?php echo date("D jS, M Y", $agent->created_at); ?></td>
-                                <td><?php echo date("D jS, M Y H:i:s", strtotime($agent->updated)); ?></td>
-                               
-                                <td>
-                                    <a href="<?php echo $agentnode_edit_url.'?view=edit&node='.$agent->ID?>" class="btn btn-sm" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a href="<?php echo $agentnode_url.'?view=tree&node='.$agent->ID?>" class="btn btn-sm" title="Tree View">
-                                        <i class="fas fa-project-diagram"></i>
-                                    </a>
-                                    <a href="<?php echo $agentnode_url.'?view=info&node='.$agent->ID?>" class="btn btn-sm" title="Ino">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <?php
-                            endforeach;
-                        endif;
+                        if (!empty($agents)):
+
+                            foreach ($agents as $agent):
+                                ?>
+                        <tr>
+                                    <td><?php echo $agent->aid; ?></td>
+
+                                            <td><?php echo $agent->user_name; ?></td>
+                                            <td><?php echo $agent->left_node_count; ?></td>
+                                            <td><?php echo $agent->right_node_count; ?></td>
+                                            <td><?php echo date("D jS, M Y", $agent->created_at); ?></td>
+                                            <td><?php echo date("D jS, M Y H:i:s", strtotime($agent->updated)); ?></td>
+
+                                            <td>
+                                                        <a href="<?php echo $agentnode_edit_url . '?view=edit&node=' . $agent->ID; ?>" class="btn btn-sm" title="Edit">
+                                                            <i class="fas fa-edit"></i>
+                                                </a>
+                                                        <a href="<?php echo $agentnode_url . '?view=tree&node=' . $agent->ID; ?>" class="btn btn-sm" title="Tree View">
+                                                            <i class="fas fa-project-diagram"></i>
+                                                </a>
+                                                        <a href="<?php echo $agentnode_url . '?view=info&node=' . $agent->ID; ?>" class="btn btn-sm" title="Ino">
+                                                            <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <?php
+                                    endforeach;
+                                endif;
                         ?>
                     </tbody>
                     <tfoot>
@@ -79,7 +79,7 @@ $agentnode_edit_url = get_permalink($foliage_settings['agentnode_addnew_page_id'
                             <th>Right</th>
                             <th>Registered</th>
                             <th>Updated</th>
-                            
+
                             <th>-</th>
                         </tr>
                     </tfoot>

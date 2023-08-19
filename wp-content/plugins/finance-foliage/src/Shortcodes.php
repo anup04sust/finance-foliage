@@ -14,7 +14,7 @@ class Shortcodes {
 
     public function __construct() {
         $this->settings = get_option('finance_foliage_settings');
-        add_filter('the_content', array($this, 'filterContent'));
+        add_filter('the_content', array($this, 'filterContent'), 9999, 1);
         add_filter('logout_redirect', array($this, 'logoutRedirect'), 9999, 1);
 
         add_shortcode('finance_foliage_account', array($this, 'userAccount'));
@@ -37,6 +37,7 @@ class Shortcodes {
             $content = $this->addAgent();
         }
         if (is_page($this->settings['agentnode_single_page_id'])) {
+           
             $content = $this->viewAgent();
         }
         if (is_page($this->settings['settings_page_id'])) {
@@ -80,8 +81,10 @@ class Shortcodes {
 
     private function viewAgent() {
         ob_start();
-        $view = !empty($_GET['view']) ? esc_attr($_GET['view']) : null;
+        $view = !empty($_REQUEST['view']) ? esc_attr($_GET['view']) : null;
+       
         if (!empty($view) && $view === 'tree') {
+
             include_once FINANCE_FOLIGE_DIR . '/views/agent-tree-view.php';
         } else if (!empty($view) && $view === 'info') {
             include_once FINANCE_FOLIGE_DIR . '/views/agent-info-view.php';

@@ -19,15 +19,22 @@
                     <li class="nav-item">
                         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
                     </li>
-
-                </ul>
-                <!-- Right navbar links -->
-                <ul class="navbar-nav ml-auto">
-                    <!-- Notifications Dropdown Menu -->
+                    <?php
+                    if (function_exists('ff_week_start_end')) {
+                    $week = ff_week_start_end();
+                    echo sprintf('<li><span class="nav-link">%s - %s</span></li>', date("D jS, M Y", $week['start']), date("D jS, M Y", $week['end']));
+                    }
+                    ?>
+                    </ul>
+                    <!--Right navbar links-->
+                    <ul class = "navbar-nav ml-auto">
+                    <!--Notifications Dropdown Menu-->
                     <?php
                     $current_user = wp_get_current_user();
                     $settings = get_option('finance_foliage_settings');
                     ?>
+
+
                     <li class="nav-item dropdown">
                         <a class="nav-link" data-toggle="dropdown" href="#">
                             <i class="far fa-user"></i>
@@ -37,7 +44,7 @@
                                 <?php echo esc_html($current_user->display_name); ?>                                
                             </span>
                             <div class="dropdown-divider"></div>
-                            <a href="<?php echo get_permalink($settings['settings_page_id']);?>" class="dropdown-item">
+                            <a href="<?php echo get_permalink($settings['settings_page_id']); ?>" class="dropdown-item">
                                 <i class="fas fa-tools mr-2"></i> Settings
                             </a>
 
@@ -48,3 +55,4 @@
                 </ul>
             </nav>
             <?php
+            

@@ -95,10 +95,3 @@ if (!empty($agent_id)):
         ?>
     </div>
 <?php endif;
-
-// Example usage
-$customStartDate = '2023-08-03'; // Replace this with your desired start date
-$numWeeks = 10; // Replace this with the number of weeks you want to generate
-
-$weekList = ff_generateWeekList();
-pprint($weekList);

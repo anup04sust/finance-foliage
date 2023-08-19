@@ -21,7 +21,7 @@ class Settings {
         $this->settings = get_option('finance_foliage_settings');
         $this->addUserRestrictions();
 
-        add_action('init', [$this, 'redirect'], 0);
+        add_filter("option_start_of_week", [$this, 'startWeek']);
         add_action('wp_enqueue_scripts', [$this, 'addScripts']);
     }
 
@@ -31,17 +31,8 @@ class Settings {
         }
     }
 
-    public function redirect() {
-        $user = wp_get_current_user();
-
-        $account_page = get_permalink($this->settings['user_account_page_id']);
-        pprint($user->ID);
-        if (empty($user->ID) && !is_page($this->settings['user_account_page_id'])) {
-            
-            wp_redirect($account_page);
-
-            wp_die('Unexpected error, please contact with administrator!!');
-        }
+    public function startWeek($day) {
+        return 4;
     }
 
     public function addScripts() {

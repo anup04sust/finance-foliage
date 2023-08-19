@@ -45,7 +45,7 @@ function ff_get_referral_agents() {
  */
 
 function ff_get_agaent_level($agent_info) {
-    //$finance_foliage_options = get_option('finance_foliage_levels');
+
     $finance_foliage_options = array(
         array(
             'level' => 1,
@@ -124,6 +124,7 @@ function ff_generate_tree_array($agent_root) {
         'left' => $leftArray,
         'right' => $rightArray,
         'created_at' => $nodes->created_at,
+        'created_str' => date("D jS, M Y", $nodes->created_at),
         'level' => ff_get_agaent_level($nodes)
     ];
 }
@@ -133,8 +134,18 @@ function ff_generateHtmlTree($nodes) {
     $html = '';
 
     if (!empty($nodes)) {
-
-        $html .= '<li><a data-aid="' . $nodes['node_aid'] . '" data-id="' . $nodes['node_id'] . '" href="#" title="' . $nodes['node'] . '"><img class="img-circle elevation-2" src="' . FINANCE_FOLIGE_DIR_URL . 'assets/images/user-64x64.png" alt="User Avatar"><span>' . $nodes['node_aid'] . '</span></a>';
+        $week = ff_week_start_end();
+        $modal_data = array(
+            'node_aid' => $nodes['node_aid'],
+            'node_id' => $nodes['node_id'],
+            'node' => $nodes['node'],
+            'left_node_count' => $nodes['left_node_count'],
+            'right_node_count' => $nodes['right_node_count'],
+            'created_str' => $nodes['created_str'],
+            'level' => $nodes['level']
+        );
+        $node_status_class = ($nodes['created_at'] >= $week['start'] && $nodes['created_at'] <= $week['end']) ? 'active-node' : 'disabled-node';
+        $html .= '<li><a class="node-link ' . $node_status_class . '" data-all="' . base64_encode(json_encode($modal_data)) . '" data-aid="' . $nodes['node_aid'] . '" data-id="' . $nodes['node_id'] . '" href="#" title="' . $nodes['node'] . '"><img class="img-circle elevation-2" src="' . FINANCE_FOLIGE_DIR_URL . 'assets/images/user-64x64.png" alt="User Avatar"><span>' . $nodes['node_aid'] . '</span></a>';
 
         if (!empty($nodes['left']) || !empty($nodes['right'])) {
             $html .= '<ul>';
@@ -164,7 +175,7 @@ function ff_add_empty_tree_node($ref, $node, $pos,) {
     );
     $add_new_link = esc_url(add_query_arg($url_arg, get_permalink($foliage_settings['agentnode_addnew_page_id'])));
 
-    $empty = '<li><a data-aid="0" data-id="0" href="' . $add_new_link . '" title="0"><img class="img-circle elevation-2" src="' . FINANCE_FOLIGE_DIR_URL . 'assets/images/user-64x64-add.png" alt="User Avatar"><span>Add Child</span></a>';
+    $empty = '<li><a class="node-add" data-aid="0" data-id="0" href="' . $add_new_link . '" title="0"><img class="img-circle elevation-2" src="' . FINANCE_FOLIGE_DIR_URL . 'assets/images/user-64x64-add.png" alt="User Avatar"><span>Add Child</span></a>';
     return $empty;
 }
 
@@ -212,6 +223,14 @@ function ff_generateWeekList() {
         'start_date' => $startOfWeek,
         'end_date' => $endOfWeek
     ];
+}
+
+function ff_week_start_end($date = '') {
+    $timezone = new DateTimeZone('Asia/Dhaka');
+
+    $datetime = empty($date) ? new DateTime('now') : new DateTime($date);
+    $datetime->setTimezone($timezone);
+    return get_weekstartend($datetime->format('Y-m-d'));
 }
 
 /*

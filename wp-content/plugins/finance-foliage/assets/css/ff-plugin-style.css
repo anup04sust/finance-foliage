@@ -17,13 +17,13 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
 .ff-tree-wrap ul {
     padding: 20px 0 0;
     position: relative;
-   display: flex;
-   
+    display: flex;
+
     transition: all 0.5s;
     -webkit-transition: all 0.5s;
     -moz-transition: all 0.5s;
     margin: 0;
-    
+
 }
 
 .ff-tree-wrap li {
@@ -117,17 +117,30 @@ right connector from last child*/
     transition: all 0.5s;
     -webkit-transition: all 0.5s;
     -moz-transition: all 0.5s;
-   
+    overflow: hidden;
+
 }
 .ff-tree-wrap li a img{
     margin: 10px 10px;
 }
- .ff-tree-wrap li a span{
-        display: block;
-        color: #000;
-        padding: 5px;
-        background-color: rgb(210, 210, 210);
-    }
+.ff-tree-wrap li a span{
+    display: block;
+    color: #000;
+    padding: 5px;
+    background-color: rgba(210, 210, 210,.5);
+
+}
+.ff-tree-wrap li a.active-node{
+    border-color: #fff;
+    box-shadow: 0 0 5px #28a745;
+}
+.ff-tree-wrap li a.node-add{
+    opacity: .5;
+}
+.ff-tree-wrap li a.active-node span{
+    background-color: #28a745;
+    color: #ffffff;
+}
 /*Time for some hover effects*/
 /*We will apply the hover effect the the lineage of the element also*/
 .ff-tree-wrap li a:hover,
@@ -143,4 +156,25 @@ right connector from last child*/
 .ff-tree-wrap li a:hover+ul::before,
 .ff-tree-wrap li a:hover+ul ul::before {
     border-color: #94a0b4;
+}
+
+#modal-node-details .modal-content{
+    
+}
+#modal-node-details .modal-content .close{
+    position: absolute;
+    left: 50%;
+    top: -28px;
+    border: 1px solid #fff;
+    border-radius: 100%;
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    line-height: 17px;     
+}
+#modal-node-details .modal-content .modal-body{
+    padding: 0;
+}
+#modal-node-details .modal-content .card-widget{
+    margin-bottom: 0;
 }

@@ -24,6 +24,9 @@
  * Text Domain:       finance-foliage
  * Domain Path:       /languages
  */
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
 // If this file is called directly, abort.
 if (!defined('WPINC')) {
     die;
@@ -57,7 +60,7 @@ if (!function_exists('fincance_foliage_init')):
     add_action('init', 'fincance_foliage_init', 1);
 
     function fincance_foliage_init() {
-        new FinanceFoliage\Loader;
+       
         $settings = get_option('finance_foliage_settings');
         //pprint($settings );
   
@@ -71,6 +74,8 @@ if (!function_exists('fincance_foliage_init')):
             exit();
             wp_die('Unexpected error, please contact with administrator!!');
         }
+
+        new FinanceFoliage\Loader;
     }
 
     function fincance_foliage_activate() {

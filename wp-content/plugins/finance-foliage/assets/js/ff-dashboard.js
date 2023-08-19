@@ -1,68 +1,64 @@
 'use strict';
-
 (function ($) {
-    var areaChartData = {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-        datasets: [
-            {
-                label: 'New Agents',
-                backgroundColor: 'rgba(60,141,188,0.9)',
-                borderColor: 'rgba(60,141,188,0.8)',
-                pointRadius: false,
-                pointColor: '#3b8bba',
-                pointStrokeColor: 'rgba(60,141,188,1)',
-                pointHighlightFill: '#fff',
-                pointHighlightStroke: 'rgba(60,141,188,1)',
-                data: [28, 48, 40, 66, 86, 100, 50]
-            },
-            {
-                label: 'Pair Complited',
-                backgroundColor: 'rgba(210, 214, 222, 1)',
-                borderColor: 'rgba(210, 214, 222, 1)',
-                pointRadius: false,
-                pointColor: 'rgba(210, 214, 222, 1)',
-                pointStrokeColor: '#c1c7d1',
-                pointHighlightFill: '#fff',
-                pointHighlightStroke: 'rgba(220,220,220,1)',
-                data: [4, 10, 6, 9, 12, 10, 10]
-            },
-        ]
-    };
+
     if ($('#donutChart').length > 0) {
         var donutChartCanvas = $('#donutChart').get(0).getContext('2d');
-        var donutData = {
-            labels: [
-                'LVL 1',
-                'LVL 2',
-                'LVL 3',
-                'LVL 4',
-                'LVL 5',
-                'LVL 6',
-            ],
+        var _donutData = {
+            labels: donutData.labels,
             datasets: [
                 {
-                    data: [700, 500, 400, 600, 300, 100],
-                    backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#d2d6de'],
+                    data: donutData.datasets.data,
+                    backgroundColor: donutData.datasets.backgroundColor,
                 }
             ]
-        }
+        };
         var donutOptions = {
             maintainAspectRatio: false,
             responsive: true,
-        }
+        };
         //Create pie or douhnut chart
         // You can switch between pie and douhnut using the method below.
-
-        new Chart(donutChartCanvas, {
-            type: 'doughnut',
-            data: donutData,
-            options: donutOptions
+        $(document).ready(function () {
+            new Chart(donutChartCanvas, {
+                type: 'pie',
+                data: _donutData,
+                options: donutOptions
+            });
         });
+
     }
     //-------------
     //- BAR CHART -
     //-------------
     if ($('#barChart').length > 0) {
+        console.log(weekDayRegeistered);
+        var areaChartData = {
+            labels: ['Thursdays', 'Fridays', 'Saturdays', 'Sundays', 'Mondays', 'Tuesdays', 'Wednesdays'],
+            datasets: [
+                {
+                    label: 'Current week',
+                    backgroundColor: 'rgba(60,141,188,0.9)',
+                    borderColor: 'rgba(60,141,188,0.8)',
+                    pointRadius: false,
+                    pointColor: '#3b8bba',
+                    pointStrokeColor: 'rgba(60,141,188,1)',
+                    pointHighlightFill: '#fff',
+                    pointHighlightStroke: 'rgba(60,141,188,1)',
+                    data: weekDayRegeistered.current_week
+                },
+                {
+                    label: 'Previous week',
+                    backgroundColor: 'rgba(210, 214, 222, 1)',
+                    borderColor: 'rgba(210, 214, 222, 1)',
+                    pointRadius: false,
+                    pointColor: 'rgba(210, 214, 222, 1)',
+                    pointStrokeColor: '#c1c7d1',
+                    pointHighlightFill: '#fff',
+                    pointHighlightStroke: 'rgba(220,220,220,1)',
+                    data: weekDayRegeistered.prev_week
+                },
+            ]
+        };
         var barChartCanvas = $('#barChart').get(0).getContext('2d');
         var barChartData = $.extend(true, {}, areaChartData);
         var temp0 = areaChartData.datasets[0];
@@ -203,5 +199,20 @@
             }
         });
     }
-
+    if ($('.ff-tree-wrap').length > 0) {
+        $('.ff-tree-wrap a.node-link').on('click', function (e) {
+            e.preventDefault();
+            var nodeJson = $(this).attr('data-all');
+            var nodeData = JSON.parse(atob(nodeJson));
+            console.dir(nodeData);
+            $('#modal-node-details .n-name').text(nodeData.node);
+            $('#modal-node-details .n-aid').text(nodeData.node_aid);
+            $('#modal-node-details .ln-count').text(nodeData.left_node_count);
+            $('#modal-node-details .rn-count').text(nodeData.right_node_count);
+            $('#modal-node-details .date-registered').text(nodeData.created_str);
+            $('#modal-node-details .level-number').text(nodeData.level.level);
+            $('#modal-node-details').modal('show');
+            return false;
+        });
+    }
 })(jQuery);
