@@ -18,7 +18,7 @@ return [
             'std' => $options['finance_foliage_levels'],
             'fields'     => [
                 [
-                    'type' => 'text',
+                    'type' => 'number',
                     'id'   => 'level',
                     'name' => esc_attr__('Level', 'finance-foliage'),
                     'attributes' => [
@@ -26,7 +26,7 @@ return [
                     ]
                 ],
                 [
-                    'type' => 'text',
+                    'type' => 'number',
                     'id'   => 'left_node',
                     'name' => esc_attr__('Left Node', 'finance-foliage'),
                     'attributes' => [
@@ -34,7 +34,7 @@ return [
                     ]
                 ],
                 [
-                    'type' => 'text',
+                    'type' => 'number',
                     'id'   => 'right_node',
                     'name' => esc_attr__('Right Node', 'finance-foliage'),
                     'attributes' => [

@@ -1,3 +1,9 @@
+<style>
+    #finance_foliage_settings_fields button[type="submit"]{
+        display: none !important;
+    }
+</style>
+
 <?php
 //
 $timezone = new DateTimeZone('Asia/Dhaka');
