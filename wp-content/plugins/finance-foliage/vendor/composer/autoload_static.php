@@ -9,6 +9,8 @@ class ComposerStaticInit48e0c77e9be2e186e83051bcced7aafe
     public static $files = array (
         '53c5a806de906ff72686af386d5d635a' => __DIR__ . '/..' . '/meta-box/mb-user-profile/mb-user-profile.php',
         'fd5250a034168d8021295c935133d935' => __DIR__ . '/..' . '/meta-box/mb-settings-page/mb-settings-page.php',
+        'f927f7b012cfb8280dde12f32cb0528b' => __DIR__ . '/..' . '/meta-box/mb-frontend-submission/mb-frontend-submission.php',
+        '5b66f5c8159bb93c984310d237032f53' => __DIR__ . '/..' . '/meta-box/meta-box-group/meta-box-group.php',
         '3cca0e5acb59fc9de7f9740c83e5adac' => __DIR__ . '/../..' . '/inc/functions.php',
     );
 

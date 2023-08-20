@@ -149,6 +149,21 @@
             "install-path": "./installers"
         },
         {
+            "name": "meta-box/mb-frontend-submission",
+            "version": "master",
+            "version_normalized": "dev-master",
+            "dist": {
+                "type": "zip",
+                "url": "https://metabox.io/?action=download&product=mb-frontend-submission&api_key=8820e8cb87c4b1591a3b8b4456b2197f"
+            },
+            "require": {
+                "composer/installers": "~1.0 || ~2.0"
+            },
+            "type": "wordpress-plugin",
+            "installation-source": "dist",
+            "install-path": "../meta-box/mb-frontend-submission"
+        },
+        {
             "name": "meta-box/mb-settings-page",
             "version": "master",
             "version_normalized": "dev-master",
@@ -177,6 +192,21 @@
             "type": "wordpress-plugin",
             "installation-source": "dist",
             "install-path": "../meta-box/mb-user-profile"
+        },
+        {
+            "name": "meta-box/meta-box-group",
+            "version": "master",
+            "version_normalized": "dev-master",
+            "dist": {
+                "type": "zip",
+                "url": "https://metabox.io/?action=download&product=meta-box-group&api_key=8820e8cb87c4b1591a3b8b4456b2197f"
+            },
+            "require": {
+                "composer/installers": "~1.0 || ~2.0"
+            },
+            "type": "wordpress-plugin",
+            "installation-source": "dist",
+            "install-path": "../meta-box/meta-box-group"
         }
     ],
     "dev": true,

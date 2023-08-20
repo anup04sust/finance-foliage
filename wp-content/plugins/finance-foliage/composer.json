@@ -8,6 +8,8 @@
       "files": [
         "vendor/meta-box/mb-user-profile/mb-user-profile.php",        
         "vendor/meta-box/mb-settings-page/mb-settings-page.php",
+        "vendor/meta-box/mb-frontend-submission/mb-frontend-submission.php",
+        "vendor/meta-box/meta-box-group/meta-box-group.php",
         "inc/functions.php"
       ]
   },
@@ -23,7 +25,9 @@
   }],
   "require": {
     "meta-box/mb-user-profile": "dev-master",
-    "meta-box/mb-settings-page": "dev-master"       
+    "meta-box/mb-settings-page": "dev-master",       
+    "meta-box/mb-frontend-submission": "dev-master",      
+    "meta-box/meta-box-group": "dev-master"      
   },
   "extra": {
     "installer-paths": {

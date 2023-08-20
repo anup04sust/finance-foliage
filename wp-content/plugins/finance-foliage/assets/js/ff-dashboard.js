@@ -215,4 +215,31 @@
             return false;
         });
     }
+
+    //save settings
+    $('.finance-foilage-save').on('click', function(e){
+        e.preventDefault();
+       
+        var formData = $('#finance_foliage_settings_fields').serialize();
+        //console.log(formData);
+    
+        var data = {
+            'action': 'finance_foliage_settings_fields_save',
+            'formData': formData      // We pass php values differently!
+        };
+        // We can also pass the url value separately from ajaxurl for front end AJAX implementations
+        $.post(financeFoliage.ajaxurl, data, function(response) {
+            if (response.success) {
+                console.log('Data inserted successfully.');
+                location.reload();
+            }
+            else {
+                console.log('Error:', response.data.message);
+            }
+        });
+
+        return false;
+        
+    });
+
 })(jQuery);

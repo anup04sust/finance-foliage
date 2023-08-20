@@ -165,7 +165,7 @@ function ff_generateHtmlTree($nodes) {
     return $html;
 }
 
-function ff_add_empty_tree_node($ref, $node, $pos,) {
+function ff_add_empty_tree_node($ref, $node, $pos) {
     $foliage_settings = get_option('finance_foliage_settings');
     $url_arg = array(
         'referral' => $ref,

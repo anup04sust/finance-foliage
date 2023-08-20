@@ -9,4 +9,8 @@ pprint(date('Y-m-d', $week_day['start']));
 pprint(date('Y-m-d', $week_day['end']));
 pprint(get_option('start_of_week'));
 ?>
-Settings
+
+<div class="container-fluid py-4">
+    <?php echo do_shortcode('[mb_frontend_form id="finance_foliage_settings_fields" post_id="'.get_the_ID().'" ajax="true"]'); ?>
+    <a href="#" class="finance-foilage-save btn btn-primary">Save settings</a>
+</div>

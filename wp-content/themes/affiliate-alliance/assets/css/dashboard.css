@@ -53009,4 +53009,8 @@ a.text-muted:hover {
 .dark-mode .border-dark {
   border-color: #4b545c !important;
 }
+
+#finance_foliage_settings_fields button[type="submit"]{
+  display: none !important;
+}
 /*# sourceMappingURL=adminlte.css.map */
