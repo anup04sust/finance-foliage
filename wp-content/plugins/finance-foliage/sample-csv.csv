@@ -1,15 +1,15 @@
-"CID","BC","ID","Name","pos","ref"
-717086,1,"s022761hosmoh00","Mohammad Amjad  Hossain",0,0
-1136399,1,"x6372hossal00","Salim  Hossain","L",717086
-1139112,1,"x4131hosmoh00","Mohammad Faisal Hossain","R",717086
-1141543,1,"x4639araeya00","Eyasin  Arafat","L",1136399
-1145077,1,"x6644hossha00","Shamim  Hossain","R",1136399
-1145456,1,"x6712ranras00","Rasel  Rana","L",1139112
-1146291,1,"x3599islzah00","Zahidul  Islam","R",1139112
-1146299,1,"x3595miashi00","Shipon  Mia","L",1141543
-1152526,1,"z24539hosalo00","Alomgir  Hossen","R",1141543
-1152527,1,"z24523alisot00","Soton  Ali","L",1152526
-1152536,1,"z24524isljoh00","Johirul  Islam","L",1146291
-1152935,1,"z24723habaho00","Ahosan  Habibrasel","R",1146291
-1153094,1,"z24898robmr.00","Mr.  Robin","L",1152935
-1153514,1,"z24628islsha00","Shafikul  Islam","R",1152935
+CID,Name,pos,ref
+717086,Mohammad Amjad  Hossain,0,0
+1136399,Salim  Hossain,L,717086
+1139112,Mohammad Faisal Hossain,R,717086
+1141543,Eyasin  Arafat,L,1136399
+1145077,Shamim  Hossain,R,1136399
+1145456,Rasel  Rana,L,1139112
+1146291,Zahidul  Islam,R,1139112
+1146299,Shipon  Mia,L,1141543
+1152526,Alomgir  Hossen,R,1141543
+1152527,Soton  Ali,L,1152526
+1152536,Johirul  Islam,L,1146291
+1152935,Ahosan  Habibrasel,R,1146291
+1153094,Mr.  Robin,L,1152935
+1153514,Shafikul  Islam,R,1152935

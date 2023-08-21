@@ -1,4 +1,5 @@
 <?php
+
 namespace FinanceFoliage;
 
 /**
@@ -15,6 +16,7 @@ class Agents {
         $this->settings = get_option('finance_foliage_settings');
         add_action("wp_ajax_addnew_agent", [$this, 'addNew']);
         add_action("wp_ajax_verify_referral", [$this, 'verifyReferral']);
+        add_action("wp_ajax_import_agents_csv", [$this, 'importCsv']);
         //add_action("wp_ajax_nopriv_my_user_vote", "my_must_login");
         global $wpdb;
 
@@ -56,7 +58,7 @@ class Agents {
 
         $user_id = username_exists($user_data['user_login']);
         if (!$user_id && false == email_exists($user_data['email'])) {
-            if($this->referralHandCheck($user_data)){
+            if ($this->referralHandCheck($user_data)) {
                 return array('status' => false, 'msg' => __('Referral hand alredy fill, please check other hand'));
             }
             $random_password = wp_generate_password();
@@ -100,7 +102,7 @@ class Agents {
 
     private function updateReferral($referral, $wing, $alliance_id) {
         global $wpdb;
-        
+
         if ($wing === 'L') {
             $alliance_id = $wpdb->update($this->tableName, array(
                 'left_node' => $alliance_id), array('aid' => $referral));
@@ -165,19 +167,72 @@ class Agents {
         }
         wp_die();
     }
+
     private function referralHandCheck($user_data) {
-        if(empty($user_data['referral'])){
+        if (empty($user_data['referral'])) {
             return false;
         }
         global $wpdb;
         $referral_data = $wpdb->get_row('SELECT left_node,right_node FROM ' . $this->tableName . ' WHERE  aid=' . $user_data['referral']);
-        if($user_data['wing']==='L' && !empty($referral_data->left_node)){
+        if ($user_data['wing'] === 'L' && !empty($referral_data->left_node)) {
             return true;
         }
-        if($user_data['wing']==='R' && !empty($referral_data->right_node)){
+        if ($user_data['wing'] === 'R' && !empty($referral_data->right_node)) {
             return true;
         }
-        
+
         return false;
+    }
+
+    public function importCsv() {
+        $agentsRow = array();
+        $csvFile = fopen($_FILES['agentcollection']['tmp_name'], 'r');
+        $count = 0;
+        while (($getData = fgetcsv($csvFile, 10000, ",")) !== FALSE) {
+            if (!empty($getData) && count($getData) === 4) {
+                if ($count >= 1) {//remove first row
+                    $agentsRow[$count] = $getData;
+                }
+                $count++;
+            }
+        }
+        if (empty($_POST['import-btn'])) {
+
+            echo wp_json_encode(array('status' => 200, 'row_count' => count($agentsRow)));
+        } else {
+            $import_status = array('success'=>0,'fail'=>0);
+            foreach ($agentsRow as $agent) {
+                $aname = esc_attr($agent[1]);
+                $created_at = esc_attr($_POST['created_at']);
+                $sl_no = esc_attr($agent[0]);
+                $referral = esc_attr($agent[3]);
+                $wing = esc_attr($agent[2]);
+                $name_array = explode(" ", $aname);
+                $user_login = $sl_no;
+                $user_login .= ($name_array[0]) ? substr($name_array[0], 0, 3) : '';
+                $user_login .= ($name_array[0]) ? substr(end($name_array), 0, 3) : '';
+
+                $user_data['first_name'] = !empty($name_array[0]) ? $name_array[0] : '';
+                $user_data['last_name'] = !empty(end($name_array)) ? end($name_array) : '';
+                $user_data['display_name'] = $aname;
+                $user_data['user_login'] = $user_login;
+                $user_data['email'] = $user_login . '@example.me';
+                $user_data['wing'] = $wing;
+                $user_data['referral'] = $referral;
+                $user_data['created_at'] = strtotime($created_at);
+                $user_data['slno'] = trim($sl_no);
+                
+
+                $create_user = $this->addWpUser($user_data);
+                if ($create_user['status']) {
+                    
+                    $import_status['success'] +=1 ;
+                } else {
+                     $import_status['fail'] +=1 ;
+                }
+            }
+            echo wp_json_encode(array('status' => 200, 'success'=>$import_status['success'],'fail'=>$import_status['fail']));
+        }
+        wp_die();
     }
 }

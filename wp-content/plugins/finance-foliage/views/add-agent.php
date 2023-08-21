@@ -91,7 +91,7 @@ $foliage_settings = get_option('finance_foliage_settings');
                                         ?> class="custom-control-input" type="radio" id="ref-wings-right" name="ref-wings" value="R">
                                         <label for="ref-wings-right" class="custom-control-label">Right Side</label>
                                     </div>
-    <?php else: ?>
+                                <?php else: ?>
                                     <div class="custom-control custom-radio">
                                         <input checked class="custom-control-input" type="radio" id="ref-wings-left" name="ref-wings" checked value="L">
                                         <label for="ref-wings-left" class="custom-control-label">Left Side</label>
@@ -100,7 +100,7 @@ $foliage_settings = get_option('finance_foliage_settings');
                                         <input class="custom-control-input" type="radio" id="ref-wings-right" name="ref-wings" value="R">
                                         <label for="ref-wings-right" class="custom-control-label">Right Side</label>
                                     </div>
-    <?php endif ?>
+                                <?php endif ?>
                             </div>
                         </div>
                         <div id="frontline-wrap" class="form-group row" style="display: none">
@@ -124,26 +124,66 @@ $foliage_settings = get_option('finance_foliage_settings');
                 </div>
                 <input type="hidden" name="action" value="addnew_agent" />
                 <input type="hidden" name="redirect" value="<?php echo $param_redirect ? get_permalink($foliage_settings[$param_redirect . '_page_id']) . 'view=tree&node=' . $param_nodeid : ""; ?>" />
-    <?php wp_nonce_field('addnew_agent'); ?>
+                <?php wp_nonce_field('addnew_agent'); ?>
             </form>
             <!-- /.card -->
-<?php else : ?>
+        <?php else : ?>
             <div class="col">
-                <form class="form-horizontal" method="post" id="form-import-new-agent">
+                <form class="form-horizontal" method="post" id="form-import-new-agent" enctype="multipart/form-data">
                     <div class="card card-info">
                         <div class="card-header">
                             <h3 class="card-title">Import agent from .csv file</h3>
                             <div class="card-tools">
-                                <a href="" class="btn btn-block btn-secondary btn-xs"><i class="fa-solid fa-file-arrow-down mr-2"></i> Sample</a>
+                                <a href="<?php echo FINANCE_FOLIGE_DIR_URL?>/sample-csv.csv" target="_blank" class="btn btn-block btn-secondary btn-xs"><i class="fa-solid fa-file-arrow-down mr-2"></i> Sample</a>
                             </div>
                         </div>
                         <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-sm-12">
+                                    <div id="form-message" class="callout" style="display: none"></div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="sl-no" class="col-sm-2 col-form-label">Date:</label>
+                                <div class="col-sm-10">
+                                    <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                                        <input required type="text" name="created_at" class="form-control datetimepicker-input" data-target="#created_at" id="created_at" value="<?php echo date('Y-m-d') ?>"/>
+                                        <div class="input-group-append" data-target="#created_at" data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
 
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label for="csv-agents" class="col-sm-2 col-form-label">Upload .CSV file</label>
+                                <div class="input-group col-sm-10">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" name="agentcollection" id="csv-agents" accept=".csv" required>
+                                        <label class="custom-file-label" for="csv-agents">Choose file</label>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-primary">Upload</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div class="card-footer">
+                            <div  class="form-group row" id="csv-import-wrap" style="display: none">
+                                 <label class="col-sm-8 col-form-label"></label>
+                                 <div class="justify-content-end col-sm-2 load-spin d-flex align-items-center"><img class="spin-img d-none" src="<?php echo get_admin_url() ?>/images/wpspin_light.gif" /></div>
+                                 <div class="input-group col-sm-2"> <button type="button" id="csv-import-btn" class="btn btn-primary btn-block">Import</button></div>
+                                
+                            </div>
                         </div>
                     </div>
+                    <input type="hidden" name="action" value="import_agents_csv" />
+                    <input type="hidden" name="redirect" value="<?php echo $param_redirect ? get_permalink($foliage_settings[$param_redirect . '_page_id']) . 'view=tree&node=' . $param_nodeid : ""; ?>" />
+                    <?php wp_nonce_field('addnew_agent'); ?>
                 </form>
             </div>
-<?php endif ?>
+        <?php endif ?>
         <div class="col">
 
         </div>

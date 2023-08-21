@@ -11,11 +11,11 @@ $agentnode_edit_url = get_permalink($foliage_settings['agentnode_addnew_page_id'
 
 
                 <div class="card-tools">
-                    <a href="#"  class="btn btn-tool" >
+                    <a href="<?php echo $agentnode_edit_url;?>"  class="btn btn-tool" >
                         <i class="fas fa-user-plus mr-2"></i> Add new agent
                     </a>
                     |
-                    <a href="#"  class="btn btn-tool" >
+                    <a href="<?php echo $agentnode_edit_url;?>?import=csv"  class="btn btn-tool" >
                         <i class="fas fa-file-upload mr-2 ml-2" ></i> Import From File
                     </a>
                 </div>

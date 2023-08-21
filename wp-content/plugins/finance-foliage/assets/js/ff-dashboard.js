@@ -217,29 +217,85 @@
     }
 
     //save settings
-    $('.finance-foilage-save').on('click', function(e){
+    $('.finance-foilage-save').on('click', function (e) {
         e.preventDefault();
-       
+
         var formData = $('#finance_foliage_settings_fields').serialize();
         //console.log(formData);
-    
+
         var data = {
             'action': 'finance_foliage_settings_fields_save',
             'formData': formData      // We pass php values differently!
         };
         // We can also pass the url value separately from ajaxurl for front end AJAX implementations
-        $.post(financeFoliage.ajaxurl, data, function(response) {
+        $.post(financeFoliage.ajaxurl, data, function (response) {
             if (response.success) {
                 console.log('Data inserted successfully.');
                 location.reload();
-            }
-            else {
+            } else {
                 console.log('Error:', response.data.message);
             }
         });
 
         return false;
-        
-    });
 
+    });
+    if ($('#form-import-new-agent').length > 0) {
+        bsCustomFileInput.init();
+        var myForm = $('#form-import-new-agent');
+        $('#form-import-new-agent').on('submit', function (e) {
+            e.preventDefault();
+            var formData = new FormData(myForm[0]);
+            //var formData =$(this).serialize();
+            //console.log(formData);
+            $.ajax({
+                type: "POST",
+                data: formData,
+                dataType: "JSON",
+                cache: false,
+                processData: false,
+                contentType: false,
+                enctype: 'multipart/form-data',
+                url: financeFoliage.ajaxurl,
+                success: function (data)
+                {
+                    console.log('data', data);
+                    console.log('data.status', data.status);
+                    if (data.status === 200) {
+                        $('#csv-import-wrap .col-form-label').html('Total agent found: ' + data.row_count);
+                        $('#csv-import-wrap').fadeIn('slow');
+                    }
+                }
+            });
+            return false;
+        });
+        $('#csv-import-btn').on('click', function () {
+            var myForm = $('#form-import-new-agent');
+            //$('#form-import-new-agent .btn').prop('disabled', true);
+            $('#csv-import-wrap .load-spin .spin-img').removeClass('d-none');
+            var formData = new FormData(myForm[0]);
+            formData.append( 'import-btn', true );
+            $.ajax({
+                type: "POST",
+                data: formData,
+                dataType: "JSON",
+                cache: false,
+                processData: false,
+                contentType: false,
+                enctype: 'multipart/form-data',
+                url: financeFoliage.ajaxurl,
+                success: function (data)
+                {
+                    console.log('data', data);
+                    console.log('data.status', data.status);
+                    if (data.status === 200) {
+                        $('#csv-import-wrap .col-form-label').html('Total agent found: ' + data.row_count);
+                        $('#csv-import-wrap').fadeIn('slow');
+                         $('#csv-import-wrap .load-spin .spin-img').addClass('d-none');
+                    }
+                }
+            });
+            return false;
+        });
+    }
 })(jQuery);

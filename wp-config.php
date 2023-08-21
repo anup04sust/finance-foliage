@@ -23,10 +23,10 @@
 define( 'DB_NAME', 'affiliate-alliance' );
 
 /** Database username */
-define('DB_USER', 'devteam');
+define('DB_USER', 'root');
 
 /** Database password */
-define('DB_PASSWORD', 'devteam127');
+define('DB_PASSWORD', 'password');
 
 /** Database hostname */
 define( 'DB_HOST', 'localhost' );

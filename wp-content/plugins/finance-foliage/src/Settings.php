@@ -132,9 +132,16 @@ class Settings {
                 true
         );
         wp_enqueue_script(
+                'bs-custom-file-input.js',
+                FINANCE_FOLIGE_DIR_URL . '/assets/bs-custom-file-input/bs-custom-file-input.min.js',
+                array('jquery'),
+                FINANCE_FOLIGE_VER,
+                true
+        );
+        wp_enqueue_script(
                 'ff-dashboard-script',
                 FINANCE_FOLIGE_DIR_URL . '/assets/js/ff-dashboard.js',
-                array('jquery', 'chart.js', 'dataTables.js', 'select2.js', 'moment.js'),
+                array('jquery', 'chart.js', 'dataTables.js', 'select2.js', 'moment.js','tempusdominus.js','bs-custom-file-input.js'),
                 FINANCE_FOLIGE_VER,
                 true
         );
