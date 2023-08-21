@@ -76,15 +76,15 @@ return [
             'id'   => 'start_day',
             'name' => esc_attr__('Start day', 'finance-foliage'),
             'options' => [
-                'sunday' => esc_attr__('Sunday', 'finance-foliage'),
-                'monday' => esc_attr__('Monday', 'finance-foliage'),
-                'tuesday' => esc_attr__('Tuesday', 'finance-foliage'),
-                'wednesday' => esc_attr__('Wednesday', 'finance-foliage'),
-                'thursday' => esc_attr__('Thursday', 'finance-foliage'),
-                'friday' => esc_attr__('Friday', 'finance-foliage'),
-                'saturday' => esc_attr__('Saturday', 'finance-foliage'),
+                '0' => esc_attr__('Sunday', 'finance-foliage'),
+                '1' => esc_attr__('Monday', 'finance-foliage'),
+                '2' => esc_attr__('Tuesday', 'finance-foliage'),
+                '3' => esc_attr__('Wednesday', 'finance-foliage'),
+                '4' => esc_attr__('Thursday', 'finance-foliage'),
+                '5' => esc_attr__('Friday', 'finance-foliage'),
+                '6' => esc_attr__('Saturday', 'finance-foliage'),
             ],
-            'std' => isset($options['start_day']) ? $options['start_day'] : 'sunday',
+            'std' => isset($options['start_day']) ? $options['start_day'] : '0',
             'visible' => [ 'bill_set', '=', 'weekly' ],
             'attributes' => [
                 'class' => 'form-control'
