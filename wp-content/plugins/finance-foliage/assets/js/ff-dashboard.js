@@ -221,7 +221,6 @@
         e.preventDefault();
        
         var formData = $('#finance_foliage_settings_fields').serialize();
-        //console.log(formData);
     
         var data = {
             'action': 'finance_foliage_settings_fields_save',

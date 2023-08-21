@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "713444668d90f4f0f3698c4fc64121b9",
+    "content-hash": "f97b1b5781a86700bfa23c12446a918a",
     "packages": [
         {
             "name": "composer/installers",
@@ -152,6 +152,18 @@
             "time": "2022-08-20T06:45:11+00:00"
         },
         {
+            "name": "meta-box/mb-frontend-submission",
+            "version": "master",
+            "dist": {
+                "type": "zip",
+                "url": "https://metabox.io/?action=download&product=mb-frontend-submission&api_key=8820e8cb87c4b1591a3b8b4456b2197f"
+            },
+            "require": {
+                "composer/installers": "~1.0 || ~2.0"
+            },
+            "type": "wordpress-plugin"
+        },
+        {
             "name": "meta-box/mb-settings-page",
             "version": "master",
             "dist": {
@@ -174,6 +186,42 @@
                 "composer/installers": "~1.0 || ~2.0"
             },
             "type": "wordpress-plugin"
+        },
+        {
+            "name": "meta-box/meta-box-conditional-logic",
+            "version": "master",
+            "dist": {
+                "type": "zip",
+                "url": "https://metabox.io/?action=download&product=meta-box-conditional-logic&api_key=8820e8cb87c4b1591a3b8b4456b2197f"
+            },
+            "require": {
+                "composer/installers": "~1.0 || ~2.0"
+            },
+            "type": "wordpress-plugin"
+        },
+        {
+            "name": "meta-box/meta-box-group",
+            "version": "master",
+            "dist": {
+                "type": "zip",
+                "url": "https://metabox.io/?action=download&product=meta-box-group&api_key=8820e8cb87c4b1591a3b8b4456b2197f"
+            },
+            "require": {
+                "composer/installers": "~1.0 || ~2.0"
+            },
+            "type": "wordpress-plugin"
+        },
+        {
+            "name": "meta-box/meta-box-tabs",
+            "version": "master",
+            "dist": {
+                "type": "zip",
+                "url": "https://metabox.io/?action=download&product=meta-box-tabs&api_key=8820e8cb87c4b1591a3b8b4456b2197f"
+            },
+            "require": {
+                "composer/installers": "~1.0 || ~2.0"
+            },
+            "type": "wordpress-plugin"
         }
     ],
     "packages-dev": [],
@@ -181,11 +229,15 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "meta-box/mb-user-profile": 20,
-        "meta-box/mb-settings-page": 20
+        "meta-box/mb-settings-page": 20,
+        "meta-box/mb-frontend-submission": 20,
+        "meta-box/meta-box-group": 20,
+        "meta-box/meta-box-tabs": 20,
+        "meta-box/meta-box-conditional-logic": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.1.0"
 }

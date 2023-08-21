@@ -10,6 +10,8 @@
         "vendor/meta-box/mb-settings-page/mb-settings-page.php",
         "vendor/meta-box/mb-frontend-submission/mb-frontend-submission.php",
         "vendor/meta-box/meta-box-group/meta-box-group.php",
+        "vendor/meta-box/meta-box-tabs/meta-box-tabs.php",
+        "vendor/meta-box/meta-box-conditional-logic/meta-box-conditional-logic.php",
         "inc/functions.php"
       ]
   },
@@ -27,7 +29,9 @@
     "meta-box/mb-user-profile": "dev-master",
     "meta-box/mb-settings-page": "dev-master",       
     "meta-box/mb-frontend-submission": "dev-master",      
-    "meta-box/meta-box-group": "dev-master"      
+    "meta-box/meta-box-group": "dev-master",      
+    "meta-box/meta-box-tabs": "dev-master",      
+    "meta-box/meta-box-conditional-logic": "dev-master"      
   },
   "extra": {
     "installer-paths": {
