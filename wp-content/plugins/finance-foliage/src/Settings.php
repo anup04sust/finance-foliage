@@ -45,8 +45,17 @@ class Settings {
         $options = get_option('finance_foliage_settings');
         if(isset($settings['finance_foliage_levels'])){
            $options['finance_foliage_levels'] = $settings['finance_foliage_levels'];
-           $update_option = update_option('finance_foliage_settings', $options);
         }
+
+        if(isset($settings['bill_set'])){
+                $options['bill_set'] = $settings['bill_set'];
+        }
+
+        if(isset($settings['start_day'])){
+                $options['start_day'] = $settings['start_day'];
+        }
+
+        $update_option = update_option('finance_foliage_settings', $options);
         
 
         if($update_option && !is_wp_error($update_option)){
