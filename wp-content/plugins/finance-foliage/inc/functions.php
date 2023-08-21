@@ -233,17 +233,47 @@ function ff_week_start_end($date = '') {
     return get_weekstartend($datetime->format('Y-m-d'));
 }
 
-/*
- Array
-(
-    [dashboard_page_id] => 55
-    [settings_page_id] => 56
-    [agentnodes_page_id] => 57
-    [finance_report_page_id] => 58
-    [login_page_id] => 40
-    [finance_report_print_page_id] => 45
-    [user_account_page_id] => 54
-    [agentnode_addnew_page_id] => 59
-    [agentnode_single_page_id] => 60
-)
- */
+if(!function_exists('ff_login_fields')){
+    add_filter( 'rwmb_profile_login_fields', 'ff_login_fields', 10, 1);
+
+    function ff_login_fields($fields){
+        $fields = [
+            'username'      => [
+                'name'     => __( 'Username or Email Address', 'mb-user-profile' ),
+                'id'       => 'user_login',
+                'type'     => 'text',
+                'required' => true,
+                'attributes' => [
+                    'class' => 'form-control'
+                ]
+            ],
+            'password'      => [
+                'name'     => __( 'Password', 'mb-user-profile' ),
+                'id'       => 'user_pass',
+                'type'     => 'password',
+                'required' => true,
+                'attributes' => [
+                    'class' => 'form-control'
+                ]
+            ],
+            'remember'      => [
+                'desc' => __( 'Remember Me', 'mb-user-profile' ),
+                'id'   => 'remember',
+                'type' => 'checkbox',
+            ],
+            'submit'        => [
+                'std'        => __( 'Log In', 'mb-user-profile' ),
+                'id'         => 'submit',
+                'type'       => 'button',
+                'attributes' => [
+                    'type'  => 'submit',
+                    'class' => 'btn btn-primary',
+                    'name'  => 'rwmb_profile_submit_login',
+                    'value' => 1,
+                ],
+            ]
+        ];
+
+        return $fields;
+    }
+}
