@@ -65,7 +65,9 @@ return [
                 'weekly' => esc_attr__('Weekly', 'finance-foliage'),
                 'monthly' => esc_attr__('Monthly', 'finance-foliage'),
             ],
-            'std' => isset($options['bill_duration']) ? $options['bill_duration'] : 'bill_duration',
+
+            'std' => isset($options['bill_duration']) ? $options['bill_duration'] : 'weekly',
+
             'attributes' => [
                 'class' => 'form-control'
             ],
