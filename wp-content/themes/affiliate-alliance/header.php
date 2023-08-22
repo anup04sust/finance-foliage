@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <!-- Google Font: Source Sans Pro -->
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+        <title><?php echo get_bloginfo('name')?>|<?php echo get_the_title()?></title>
         <?php
         wp_head();
         ?>
@@ -20,14 +21,24 @@
                         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
                     </li>
                     <?php
-                    if (function_exists('ff_week_start_end')) {
-                    $week = ff_week_start_end();
-                    echo sprintf('<li><span class="nav-link">%s - %s</span></li>', date("D jS, M Y", $week['start']), date("D jS, M Y", $week['end']));
+                    if (function_exists('ff_get_bill_duration')) {
+                        $bill = ff_get_bill_duration();
+                        switch ($bill['bill_type']) {
+                            case 'daily':
+                                echo sprintf('<li><span class="nav-link">%s : %s</span></li>', strtoupper($bill['bill_type']), date("D jS, M Y", $bill['bill_date']));
+                                break;
+                            case 'weekly':
+                               echo sprintf('<li><span class="nav-link">%s : %s - %s</span></li>', strtoupper($bill['bill_type']), date("D jS, M Y", $bill['week_start']),date("D jS, M Y", $bill['week_end']));
+                                break;
+                            case 'monthly':
+                                echo sprintf('<li><span class="nav-link">%s : %s - %s</span></li>', strtoupper($bill['bill_type']), date("D jS, M Y", $bill['month_start']),date("D jS, M Y", $bill['month_end']));
+                                break;
+                        }
                     }
                     ?>
-                    </ul>
-                    <!--Right navbar links-->
-                    <ul class = "navbar-nav ml-auto">
+                </ul>
+                <!--Right navbar links-->
+                <ul class = "navbar-nav ml-auto">
                     <!--Notifications Dropdown Menu-->
                     <?php
                     $current_user = wp_get_current_user();

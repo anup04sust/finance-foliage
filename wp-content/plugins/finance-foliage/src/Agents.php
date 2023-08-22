@@ -17,7 +17,8 @@ class Agents {
         add_action("wp_ajax_addnew_agent", [$this, 'addNew']);
         add_action("wp_ajax_verify_referral", [$this, 'verifyReferral']);
         add_action("wp_ajax_import_agents_csv", [$this, 'importCsv']);
-        //add_action("wp_ajax_nopriv_my_user_vote", "my_must_login");
+        add_action("wp_ajax_sync_agents", [$this, 'syncAgents']);
+
         global $wpdb;
 
         $this->tableName = $wpdb->prefix . 'alliance';
@@ -124,15 +125,15 @@ class Agents {
         global $wpdb;
         if ($wing === 'L') {
             $wpdb->query("UPDATE " . $this->tableName . " SET left_node_count =  left_node_count + 1  WHERE aid=" . $referral);
-            pprint("UPDATE " . $this->tableName . " SET left_node_count =  left_node_count + 1  WHERE aid=" . $referral);
+            //pprint("UPDATE " . $this->tableName . " SET left_node_count =  left_node_count + 1  WHERE aid=" . $referral);
         }
         if ($wing === 'R') {
             $wpdb->query("UPDATE " . $this->tableName . " SET right_node_count = right_node_count + 1  WHERE aid=" . $referral);
-            pprint("UPDATE " . $this->tableName . " SET right_node_count = right_node_count + 1  WHERE aid=" . $referral);
+            //pprint("UPDATE " . $this->tableName . " SET right_node_count = right_node_count + 1  WHERE aid=" . $referral);
         }
 
         $node_referral = $wpdb->get_row('SELECT parent_node,spos FROM ' . $this->tableName . ' WHERE  aid=' . $referral);
-        pprint($node_referral);
+
         if (!empty($node_referral)) {
             return $this->updateNodeCount($node_referral->parent_node, $node_referral->spos, $level++);
         } else {
@@ -200,7 +201,7 @@ class Agents {
 
             echo wp_json_encode(array('status' => 200, 'row_count' => count($agentsRow)));
         } else {
-            $import_status = array('success'=>0,'fail'=>0);
+            $import_status = array('success' => 0, 'fail' => 0);
             foreach ($agentsRow as $agent) {
                 $aname = esc_attr($agent[1]);
                 $created_at = esc_attr($_POST['created_at']);
@@ -221,18 +222,59 @@ class Agents {
                 $user_data['referral'] = $referral;
                 $user_data['created_at'] = strtotime($created_at);
                 $user_data['slno'] = trim($sl_no);
-                
 
                 $create_user = $this->addWpUser($user_data);
+
                 if ($create_user['status']) {
-                    
-                    $import_status['success'] +=1 ;
+
+                    $import_status['success'] += 1;
                 } else {
-                     $import_status['fail'] +=1 ;
+                    $import_status['fail'] += 1;
                 }
             }
-            echo wp_json_encode(array('status' => 200, 'success'=>$import_status['success'],'fail'=>$import_status['fail']));
+            echo wp_json_encode(array('status' => 200, 'success' => $import_status['success'], 'fail' => $import_status['fail']));
         }
         wp_die();
+    }
+
+    public function syncAgents() {
+        $sync_status = esc_attr($_POST['sync_status']);
+        $bill_duration = esc_attr($_POST['bill_duration']);
+        $sync_date = esc_attr($_POST['sync_date']);
+        $this->resetAgentsLevel($sync_date);
+        
+        if ($bill_duration == 'weekly') {
+            $bill = ff_get_bill_duration($sync_date);
+            
+            $this->syncNodeCount($bill['week_start'], $bill['week_end']);
+        } elseif ($bill_duration == 'monthly') {
+            $bill = ff_get_bill_duration($sync_date);
+            $this->syncNodeCount($bill['month_start'], $bill['month_end']);
+        } else {
+            $this->syncNodeCount(strtotime($sync_date), strtotime($sync_date));
+        }
+        echo wp_json_encode(['status' => 200, 'msg' => '']);
+        wp_die();
+    }
+
+    private function resetAgentsLevel($sdate) {
+        global $wpdb;
+
+        $updated = $wpdb->query('UPDATE ' . $this->tableName . ' SET right_node_count = \'0\',left_node_count = \'0\'');
+        $settings = get_option('finance_foliage_settings');
+        $settings['last_sync_date'] = strtotime('now');
+        $settings['sync_date'] = strtotime($sdate);
+        update_option('finance_foliage_settings', $settings);
+    }
+
+    private function syncNodeCount($sdate, $edate) {
+        
+        global $wpdb;
+        $nodes = $wpdb->get_results('SELECT * FROM ' . $this->tableName . ' WHERE created_at >=' . $sdate . ' AND created_at <=' . $edate);
+        
+        foreach ($nodes as $node) {
+            $nodeCount = $this->updateNodeCount($node->parent_node, $node->spos);
+            // pprint($nodeCount);
+        }
     }
 }

@@ -47,12 +47,12 @@ class Settings {
            $options['finance_foliage_levels'] = $settings['finance_foliage_levels'];
         }
 
-        if(isset($settings['bill_set'])){
-                $options['bill_set'] = $settings['bill_set'];
+        if(isset($settings['bill_duration'])){
+                $options['bill_duration'] = $settings['bill_duration'];
         }
 
-        if(isset($settings['start_day'])){
-                $options['start_day'] = $settings['start_day'];
+        if(isset($settings['bill_week_start_day'])){
+                $options['bill_week_start_day'] = $settings['bill_week_start_day'];
         }
 
         $update_option = update_option('finance_foliage_settings', $options);
@@ -86,7 +86,8 @@ class Settings {
     }
 
     public function startWeek($day) {
-        return 4;
+        $week_start_day = @$this->settings['bill_week_start_day'];
+        return empty($week_start_day)? 0: $week_start_day - 1;
     }
 
     public function addScripts() {

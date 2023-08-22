@@ -8,6 +8,3 @@
     <?php echo do_shortcode('[mb_frontend_form id="finance_foliage_settings_fields" post_id="'.get_the_ID().'" ajax="false"]'); ?>
     <a href="#" class="finance-foilage-save btn btn-primary mt-3">Save settings</a>
 </div>
-<?php 
-pprint(get_option('finance_foliage_settings'));
-?>

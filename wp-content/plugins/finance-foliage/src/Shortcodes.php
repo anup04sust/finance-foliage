@@ -21,6 +21,7 @@ class Shortcodes {
         add_shortcode('finance_foliage_dashboard', array($this, 'userDashboard'));
         add_shortcode('finance_foliage_agents', array($this, 'agentList'));
         add_shortcode('finance_foliage_add_new_agent', array($this, 'addAgent'));
+        add_shortcode('finance_foliage_config_sync', array($this, 'configSync'));
     }
 
     public function filterContent($content) {
@@ -45,6 +46,9 @@ class Shortcodes {
         }
         if (is_page($this->settings['finance_report_page_id'])) {
             $content = $this->financeReports();
+        }
+        if (is_page($this->settings['node_sync_page_id'])) {
+            $content = $this->configSync();
         }
         return $content;
     }
@@ -100,6 +104,11 @@ class Shortcodes {
     private function financeReports() {
         ob_start();
         include_once FINANCE_FOLIGE_DIR . '/views/finance-report.php';
+        return ob_get_clean();
+    }
+    private function configSync() {
+        ob_start();
+        include_once FINANCE_FOLIGE_DIR . '/views/config-sync.php';
         return ob_get_clean();
     }
 }

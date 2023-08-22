@@ -21,10 +21,11 @@ class FfSetups {
         $this->crateSettingsPage();
         $this->crateAgentNodesPage();
         $this->crateFinanceReportPage();
-        $this->crateFinanceReportPrintPage();
+        $this->crateSynchronization();
         $this->crateAddAgentPage();
         $this->singleAgentPage();
         $this->addUserRoles();
+        
 
         update_option($this->option_name, $this->setting_options);
 
@@ -119,12 +120,12 @@ class FfSetups {
         }
     }
 
-    private function crateFinanceReportPrintPage() {
-        $page_slug = 'finance-report'; // Slug of the Post
+    private function crateSynchronization() {
+        $page_slug = 'node-sync'; // Slug of the Post
         $pageObj = array(
             'post_type' => 'page', // Post Type Slug eg: 'page', 'post'
-            'post_title' => 'Finance Report Print', // Title of the Content
-            'post_content' => 'finance-report shortcode', // Content
+            'post_title' => 'Agents Synchronization', // Title of the Content
+            'post_content' => 'Agents Synchronization', // Content
             'post_status' => 'publish', // Post Status
             'post_author' => 1, // Post Author ID
             'post_name' => $page_slug   // Slug of the Post
@@ -132,7 +133,7 @@ class FfSetups {
         if (!get_page_by_path($page_slug, OBJECT, 'page')) { // Check If Page Not Exits
             $page_id = wp_insert_post($pageObj);
 
-            $this->setting_options['finance_report_print_page_id'] = $page_id;
+            $this->setting_options['node_sync_page_id'] = $page_id;
         }
     }
 
@@ -203,29 +204,31 @@ class FfSetups {
     private function createDbTable() {
         global $wpdb;
         $charset_collate = $wpdb->get_charset_collate();
-        $table_name = $wpdb->prefix . 'affiliate_alliance';
+        $table_name = $wpdb->prefix . 'alliance';
         $sql = "CREATE TABLE " . $table_name . " (
-  ID bigint NOT NULL,
-  user_id bigint NOT NULL,
-  agent_cid int NOT NULL,
-  user_name varchar(255) NOT NULL,
-  business_center int NOT NULL DEFAULT '1',
-  left_node int NOT NULL DEFAULT '0',
-  right_node int NOT NULL DEFAULT '0',
-  left_hand_count int NOT NULL DEFAULT '0',
-  right_hand_count int NOT NULL DEFAULT '0',
-  parent_node int NOT NULL,
-  wallet_amount float NOT NULL DEFAULT '0',
-  updated datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) " . $charset_collate . ";";
+                    ID bigint NOT NULL,
+                    user_id bigint NOT NULL,
+                    aid int NOT NULL,
+                    user_name varchar(255) NOT NULL,
+                    business_center int NOT NULL DEFAULT '1',
+                    left_node int NOT NULL DEFAULT '0',
+                    right_node int NOT NULL DEFAULT '0',
+                    left_hand_count int NOT NULL DEFAULT '0',
+                    right_hand_count int NOT NULL DEFAULT '0',
+                    parent_node int NOT NULL,
+                    spos enum('L','R','0') NOT NULL DEFAULT '0',
+                    wallet_amount float NOT NULL DEFAULT '0',
+                    updated datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    created_at bigint NOT NULL
+                  ) " . $charset_collate . ";";
 
         $sql .= "ALTER TABLE " . $table_name . "
   ADD PRIMARY KEY (ID),
   ADD KEY parent_node (parent_node);";
 
-        $sql .= "ALTER TABLE affiliate_alliance
-  MODIFY ID bigint NOT NULL AUTO_INCREMENT;
-COMMIT;";
+        $sql .= "ALTER TABLE " . $table_name . "
+  MODIFY ID bigint NOT NULL AUTO_INCREMENT;";
+       
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
     }

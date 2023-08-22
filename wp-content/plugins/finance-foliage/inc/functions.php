@@ -30,7 +30,7 @@ function ff_get_referral_agents() {
     $agents_options = [];
     global $wpdb;
 
-    $referral_nodes = $wpdb->get_results('SELECT aid,user_name FROM ' . $wpdb->prefix . 'alliance' . ' WHERE left_node IS NULL OR  right_node IS NULL ORDER BY user_name ASC');
+    $referral_nodes = $wpdb->get_results('SELECT aid,user_name FROM ' . $wpdb->prefix . 'alliance' . ' WHERE left_node=0 OR  right_node=0 ORDER BY user_name ASC');
     if (!empty($referral_nodes)) {
         foreach ($referral_nodes as $node) {
             $agents_options[$node->aid] = $node->user_name . '(' . $node->aid . ')';
@@ -45,49 +45,52 @@ function ff_get_referral_agents() {
  */
 
 function ff_get_agaent_level($agent_info) {
-
-    $finance_foliage_options = array(
-        array(
-            'level' => 1,
-            'left_node' => 1,
-            'right_node' => 1,
-            'amount' => 1440
-        ),
-        array(
-            'level' => 2,
-            'left_node' => 2,
-            'right_node' => 2,
-            'amount' => 2250
-        ),
-        array(
-            'level' => 3,
-            'left_node' => 4,
-            'right_node' => 4,
-            'amount' => 4320
-        ),
-        array(
-            'level' => 4,
-            'left_node' => 8,
-            'right_node' => 8,
-            'amount' => 8640
-        ),
-        array(
-            'level' => 5,
-            'left_node' => 15,
-            'right_node' => 15,
-            'amount' => 16650
-        ),
-    );
-
+    $options = get_option('finance_foliage_settings');
+    if (empty($options['finance_foliage_levels'])) {
+        $finance_levels = array(
+            array(
+                'level' => 1,
+                'left_node' => 1,
+                'right_node' => 1,
+                'amount' => 1440
+            ),
+            array(
+                'level' => 2,
+                'left_node' => 2,
+                'right_node' => 2,
+                'amount' => 2250
+            ),
+            array(
+                'level' => 3,
+                'left_node' => 4,
+                'right_node' => 4,
+                'amount' => 4320
+            ),
+            array(
+                'level' => 4,
+                'left_node' => 8,
+                'right_node' => 8,
+                'amount' => 8640
+            ),
+            array(
+                'level' => 5,
+                'left_node' => 15,
+                'right_node' => 15,
+                'amount' => 16650
+            ),
+        );
+    } else {
+        $finance_levels = $options['finance_foliage_levels'];
+    }
     $response = array('level' => 0, 'amount' => 0);
     if (!empty($agent_info->left_node_count) && !empty($agent_info->right_node_count)) {
-        foreach ($finance_foliage_options as $settings) {
+        foreach ($finance_levels as $settings) {
 
             if ($agent_info->left_node_count >= $settings['left_node'] && $agent_info->right_node_count >= $settings['right_node']) {
 
                 $response = array(
                     'level' => $settings['level'],
-                    'amount' => $response['amount'] + $settings['amount']
+                    'amount' => $response['amount'] + $settings['level_amount']
                 );
             }
         }
@@ -134,7 +137,8 @@ function ff_generateHtmlTree($nodes) {
     $html = '';
 
     if (!empty($nodes)) {
-        $week = ff_week_start_end();
+        $bill_duration = ff_get_bill_duration();
+
         $modal_data = array(
             'node_aid' => $nodes['node_aid'],
             'node_id' => $nodes['node_id'],
@@ -144,7 +148,16 @@ function ff_generateHtmlTree($nodes) {
             'created_str' => $nodes['created_str'],
             'level' => $nodes['level']
         );
-        $node_status_class = ($nodes['created_at'] >= $week['start'] && $nodes['created_at'] <= $week['end']) ? 'active-node' : 'disabled-node';
+
+        if ($bill_duration['bill_type'] === 'daily') {
+            $node_status_class = ($nodes['created_at'] >= $bill_duration['bill_date']) ? 'active-node' : 'disabled-node';
+        }
+        if ($bill_duration['bill_type'] === 'weekly') {
+            $node_status_class = ($nodes['created_at'] >= $bill_duration['week_start'] && $nodes['created_at'] <= $bill_duration['week_end']) ? 'active-node' : 'disabled-node';
+        }
+        if ($bill_duration['bill_type'] === 'monthly') {
+            $node_status_class = ($nodes['created_at'] >= $bill_duration['month_start'] && $nodes['created_at'] <= $bill_duration['month_end']) ? 'active-node' : 'disabled-node';
+        }
         $html .= '<li><a class="node-link ' . $node_status_class . '" data-all="' . base64_encode(json_encode($modal_data)) . '" data-aid="' . $nodes['node_aid'] . '" data-id="' . $nodes['node_id'] . '" href="#" title="' . $nodes['node'] . '"><img class="img-circle elevation-2" src="' . FINANCE_FOLIGE_DIR_URL . 'assets/images/user-64x64.png" alt="User Avatar"><span>' . $nodes['node_aid'] . '</span></a>';
 
         if (!empty($nodes['left']) || !empty($nodes['right'])) {
@@ -233,42 +246,42 @@ function ff_week_start_end($date = '') {
     return get_weekstartend($datetime->format('Y-m-d'));
 }
 
-if(!function_exists('ff_login_fields')){
-    add_filter( 'rwmb_profile_login_fields', 'ff_login_fields', 10, 1);
+if (!function_exists('ff_login_fields')) {
+    add_filter('rwmb_profile_login_fields', 'ff_login_fields', 10, 1);
 
-    function ff_login_fields($fields){
+    function ff_login_fields($fields) {
         $fields = [
-            'username'      => [
-                'name'     => __( 'Username or Email Address', 'mb-user-profile' ),
-                'id'       => 'user_login',
-                'type'     => 'text',
+            'username' => [
+                'name' => __('Username or Email Address', 'mb-user-profile'),
+                'id' => 'user_login',
+                'type' => 'text',
                 'required' => true,
                 'attributes' => [
                     'class' => 'form-control'
                 ]
             ],
-            'password'      => [
-                'name'     => __( 'Password', 'mb-user-profile' ),
-                'id'       => 'user_pass',
-                'type'     => 'password',
+            'password' => [
+                'name' => __('Password', 'mb-user-profile'),
+                'id' => 'user_pass',
+                'type' => 'password',
                 'required' => true,
                 'attributes' => [
                     'class' => 'form-control'
                 ]
             ],
-            'remember'      => [
-                'desc' => __( 'Remember Me', 'mb-user-profile' ),
-                'id'   => 'remember',
+            'remember' => [
+                'desc' => __('Remember Me', 'mb-user-profile'),
+                'id' => 'remember',
                 'type' => 'checkbox',
             ],
-            'submit'        => [
-                'std'        => __( 'Log In', 'mb-user-profile' ),
-                'id'         => 'submit',
-                'type'       => 'button',
+            'submit' => [
+                'std' => __('Log In', 'mb-user-profile'),
+                'id' => 'submit',
+                'type' => 'button',
                 'attributes' => [
-                    'type'  => 'submit',
+                    'type' => 'submit',
                     'class' => 'btn btn-primary',
-                    'name'  => 'rwmb_profile_submit_login',
+                    'name' => 'rwmb_profile_submit_login',
                     'value' => 1,
                 ],
             ]
@@ -276,4 +289,46 @@ if(!function_exists('ff_login_fields')){
 
         return $fields;
     }
+
+}
+
+function ff_get_bill_duration($current_date = '') {
+    $options = get_option('finance_foliage_settings');
+    $bill_duration = !empty($options['bill_duration']) ? $options['bill_duration'] : 'weekly';
+    $week_start_day = !empty($options['bill_week_start_day']) ? $options['bill_week_start_day'] - 1 : 4;
+    if(!empty($current_date)){
+        $current_date = is_int($current_date)?$current_date:strtotime($current_date); 
+    }else if(!empty ($options['sync_date'])){
+        $current_date = $options['sync_date'];
+    }else{
+        $current_date = strtotime("now"); 
+    }
+   
+
+    $response = array(
+        'bill_type' => $bill_duration,
+        'bill_date' => $current_date,
+        'bill_date_str' => date("D jS, M Y", $current_date),
+        'sync_date' => !empty($options['sync_date']) ? $options['sync_date'] : null,
+        'last_sync_date' => !empty($options['last_sync_date']) ? $options['last_sync_date'] : null,
+    );
+    switch ($bill_duration) {
+        case 'daily':
+            return $response;
+            break;
+        case 'weekly':
+            $week = ff_week_start_end(date("Y-m-d", $current_date));
+            $response['week_start'] = $week['start'];
+            $response['week_end'] = $week['end'];
+            $response['week_label'] = date("D jS, M Y", $week['start']) . ' - ' . date("D jS, M Y", $week['end']);
+            break;
+        case 'monthly':
+            $week = ff_week_start_end(date("Y-m-d", $current_date));
+            $response['month_start'] = strtotime(date("Y-m-01", $current_date));
+            $response['month_end'] = strtotime(date("Y-m-t", $current_date));
+            $response['month_label'] = date("D jS, M Y", $response['month_start']) . ' - ' . date("D jS, M Y", $response['month_end']);
+            break;
+    }
+
+    return $response;
 }

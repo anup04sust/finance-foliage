@@ -33,7 +33,7 @@ $settings = get_option('finance_foliage_settings');
 
                 <li class="nav-item">
                     <a href="<?php echo get_permalink($settings['dashboard_page_id']); ?>" class="nav-link <?php if (is_page($settings['dashboard_page_id'])) echo 'active'; ?>">
-                       <i class="fas fa-tachometer-alt mr-1"></i>
+                        <i class="fas fa-tachometer-alt mr-1"></i>
                         <p>
                             Dashboard
                         </p>
@@ -41,7 +41,7 @@ $settings = get_option('finance_foliage_settings');
                 </li>
                 <li class="nav-item">
                     <a href="<?php echo get_permalink($settings['agentnodes_page_id']); ?>" class="nav-link 
-                        <?php if (is_page($settings['agentnodes_page_id']) | is_page($settings['agentnode_addnew_page_id'])) echo 'active'; ?>">
+                       <?php if (is_page($settings['agentnodes_page_id']) | is_page($settings['agentnode_addnew_page_id'])) echo 'active'; ?>">
                         <i class="fas fa-users mr-1"></i>
                         <p>
                             Agents
@@ -66,17 +66,25 @@ $settings = get_option('finance_foliage_settings');
                 </li>
                 <li class="nav-item">
                     <a href="<?php echo get_permalink($settings['finance_report_page_id']); ?>" class="nav-link <?php if (is_page($settings['finance_report_page_id'])) echo 'active'; ?>">
-                       <i class="fas fa-chart-pie mr-1"></i>
+                        <i class="fas fa-chart-pie mr-1"></i>
                         <p>
                             Reports
                         </p>
                     </a>
                 </li>
- <li class="nav-item">
+                <li class="nav-item">
                     <a href="<?php echo get_permalink($settings['settings_page_id']); ?>" class="nav-link <?php if (is_page($settings['settings_page_id'])) echo 'active'; ?>">
-                       <i class="fas fa-tools mr-1"></i>
+                        <i class="fas fa-tools mr-1"></i>
                         <p>
                             Settings
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?php echo get_permalink($settings['node_sync_page_id']); ?>" class="nav-link <?php if (is_page($settings['node_sync_page_id'])) echo 'active'; ?>">
+                        <i class="fas fa-sync mr-1"></i>
+                        <p>
+                            Sync
                         </p>
                     </a>
                 </li>

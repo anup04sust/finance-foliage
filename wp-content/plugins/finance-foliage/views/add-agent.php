@@ -146,8 +146,8 @@ $foliage_settings = get_option('finance_foliage_settings');
                             <div class="form-group row">
                                 <label for="sl-no" class="col-sm-2 col-form-label">Date:</label>
                                 <div class="col-sm-10">
-                                    <div class="input-group date" id="reservationdate" data-target-input="nearest">
-                                        <input required type="text" name="created_at" class="form-control datetimepicker-input" data-target="#created_at" id="created_at" value="<?php echo date('Y-m-d') ?>"/>
+                                    <div class="input-group date" id="created-at-datetimepicker" data-target-input="nearest">
+                                        <input required type="text" name="created_at" class="form-control datetimepicker-input" data-toggle="datetimepicker" data-target="#created_at" id="created_at" value="<?php echo date('Y-m-d') ?>"/>
                                         <div class="input-group-append" data-target="#created_at" data-toggle="datetimepicker">
                                             <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                         </div>
