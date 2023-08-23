@@ -5,6 +5,7 @@ $param_wing = !empty($_GET['wing']) ? esc_attr($_GET['wing']) : null;
 $param_redirect = !empty($_GET['redirect']) ? esc_attr($_GET['redirect']) : null;
 $param_nodeid = !empty($_GET['redirect']) ? esc_attr($_GET['node']) : null;
 $foliage_settings = get_option('finance_foliage_settings');
+$agentnode_edit_url = get_permalink($foliage_settings['agentnode_addnew_page_id']);
 ?>
 <div class="row d-flex justify-content-center">
     <div class="col-sm-12 col-md-12 col-lg-8">
@@ -14,6 +15,12 @@ $foliage_settings = get_option('finance_foliage_settings');
                 <div class="card card-info">
                     <div class="card-header">
                         <h3 class="card-title">Agent Registration Form</h3>
+                        <div class="card-tools">
+
+                            <a href="<?php echo $agentnode_edit_url; ?>?import=csv"  class="btn btn-tool" >
+                                <i class="fas fa-file-upload mr-2 ml-2" ></i> Import From File
+                            </a>
+                        </div>
                     </div>
                     <!-- /.card-header -->
                     <!-- form start -->
@@ -134,7 +141,11 @@ $foliage_settings = get_option('finance_foliage_settings');
                         <div class="card-header">
                             <h3 class="card-title">Import agent from .csv file</h3>
                             <div class="card-tools">
-                                <a href="<?php echo FINANCE_FOLIGE_DIR_URL?>/sample-csv.csv" target="_blank" class="btn btn-block btn-secondary btn-xs"><i class="fa-solid fa-file-arrow-down mr-2"></i> Sample</a>
+                                <a href="<?php echo $agentnode_edit_url; ?>"  class="btn btn-tool" >
+                                    <i class="fas fa-user-plus mr-2"></i> Add new agent
+                                </a>
+                                |
+                                <a href="<?php echo FINANCE_FOLIGE_DIR_URL ?>/sample-csv.csv" target="_blank" class="btn btn-tool  btn-secondary ><i class="fa-solid fa-file-arrow-down mr-2"></i> Sample</a>
                             </div>
                         </div>
                         <div class="card-body">
@@ -147,8 +158,8 @@ $foliage_settings = get_option('finance_foliage_settings');
                                 <label for="sl-no" class="col-sm-2 col-form-label">Date:</label>
                                 <div class="col-sm-10">
                                     <div class="input-group date" id="created-at-datetimepicker" data-target-input="nearest">
-                                        <input required type="text" name="created_at" class="form-control datetimepicker-input" data-toggle="datetimepicker" data-target="#created_at" id="created_at" value="<?php echo date('Y-m-d') ?>"/>
-                                        <div class="input-group-append" data-target="#created_at" data-toggle="datetimepicker">
+                                        <input required type="text" name="created_at" class="form-control datetimepicker-input" data-toggle="datetimepicker" data-target="#created-at-datetimepicker" id="created_at" value="<?php echo date('Y-m-d') ?>"/>
+                                        <div class="input-group-append" data-target="#created-at-datetimepicker" data-toggle="datetimepicker">
                                             <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                         </div>
                                     </div>
@@ -167,14 +178,14 @@ $foliage_settings = get_option('finance_foliage_settings');
                                     </div>
                                 </div>
                             </div>
-                            
+
                         </div>
                         <div class="card-footer">
                             <div  class="form-group row" id="csv-import-wrap" style="display: none">
-                                 <label class="col-sm-8 col-form-label"></label>
-                                 <div class="justify-content-end col-sm-2 load-spin d-flex align-items-center"><img class="spin-img d-none" src="<?php echo get_admin_url() ?>/images/wpspin_light.gif" /></div>
-                                 <div class="input-group col-sm-2"> <button type="button" id="csv-import-btn" class="btn btn-primary btn-block">Import</button></div>
-                                
+                                <label class="col-sm-8 col-form-label"></label>
+                                <div class="justify-content-end col-sm-2 load-spin d-flex align-items-center"><img class="spin-img d-none" src="<?php echo get_admin_url() ?>/images/wpspin_light.gif" /></div>
+                                <div class="input-group col-sm-2"> <button type="button" id="csv-import-btn" class="btn btn-primary btn-block">Import</button></div>
+
                             </div>
                         </div>
                     </div>

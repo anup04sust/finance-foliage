@@ -10,19 +10,16 @@ if (!empty($agent_id)):
         <div class="col-sm-12">
             <div class="small-box bg-info">
                 <div class="inner">
-                    <div class="ff-tree-wrap  d-flex justify-content-center">
-                        <ul>
+                    <div class="ff-tree-wrap">
+                        <ul class="level-root">
                             <?php echo ff_get_agents_tree($agent_id); ?>
                         </ul>
+                        <a href="#" id="expand-all" title="Expand/Collapse all"><i class="fas fa-angle-double-down"></i></a>
                     </div>
 
                     </div>
-                    <div class="icon">
-                        <i class="ion ion-stats-bars"></i>
-                    </div>
-                    <a href="#" class="small-box-footer">
-                        Load More <i class="fas fa-arrow-circle-right"></i>
-                    </a>
+                   
+                  
                 </div>
             </div>
         </div>

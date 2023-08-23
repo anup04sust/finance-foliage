@@ -102,10 +102,13 @@ function ff_get_agaent_level($agent_info) {
 function ff_get_agents_tree($agent_root) {
     global $wpdb;
     $nodes = $wpdb->get_row('SELECT aid FROM ' . $wpdb->prefix . 'alliance' . ' WHERE ID=' . $agent_root);
+    if(!empty($nodes)){
     $agents_tree_array = ff_generate_tree_array($nodes->aid);
     $tree_html = ff_generateHtmlTree($agents_tree_array);
 
     return $tree_html;
+    
+    }
 }
 
 function ff_generate_tree_array($agent_root) {
@@ -132,7 +135,7 @@ function ff_generate_tree_array($agent_root) {
     ];
 }
 
-function ff_generateHtmlTree($nodes) {
+function ff_generateHtmlTree($nodes,$tree_level=0) {
 
     $html = '';
 
@@ -158,12 +161,12 @@ function ff_generateHtmlTree($nodes) {
         if ($bill_duration['bill_type'] === 'monthly') {
             $node_status_class = ($nodes['created_at'] >= $bill_duration['month_start'] && $nodes['created_at'] <= $bill_duration['month_end']) ? 'active-node' : 'disabled-node';
         }
-        $html .= '<li><a class="node-link ' . $node_status_class . '" data-all="' . base64_encode(json_encode($modal_data)) . '" data-aid="' . $nodes['node_aid'] . '" data-id="' . $nodes['node_id'] . '" href="#" title="' . $nodes['node'] . '"><img class="img-circle elevation-2" src="' . FINANCE_FOLIGE_DIR_URL . 'assets/images/user-64x64.png" alt="User Avatar"><span>' . $nodes['node_aid'] . '</span></a>';
+        $html .= '<li><a class="node-link ' . $node_status_class . '" data-all="' . base64_encode(json_encode($modal_data)) . '" data-aid="' . $nodes['node_aid'] . '" data-id="' . $nodes['node_id'] . '" href="#" title="' . $nodes['node'] . '"><img class="img-circle elevation-2" src="' . FINANCE_FOLIGE_DIR_URL . 'assets/images/user-64x64.png" alt="User Avatar"><span>' . $nodes['node_aid'] . '</span><span class="view-more"><i class="fas fa-angle-down"></i></span></a>';
 
         if (!empty($nodes['left']) || !empty($nodes['right'])) {
-            $html .= '<ul>';
-            $html .= !empty($nodes['left']) ? ff_generateHtmlTree($nodes['left']) : ff_add_empty_tree_node($nodes['node_aid'], $nodes['node_id'], 'L');
-            $html .= !empty($nodes['right']) ? ff_generateHtmlTree($nodes['right']) : ff_add_empty_tree_node($nodes['node_aid'], $nodes['node_id'], 'R');
+            $html .= '<ul class="level level-'.$tree_level.'">';
+            $html .= !empty($nodes['left']) ? ff_generateHtmlTree($nodes['left'],$tree_level++) : ff_add_empty_tree_node($nodes['node_aid'], $nodes['node_id'], 'L');
+            $html .= !empty($nodes['right']) ? ff_generateHtmlTree($nodes['right'],$tree_level++) : ff_add_empty_tree_node($nodes['node_aid'], $nodes['node_id'], 'R');
             $html .= '</ul>';
         } else if (empty($nodes['left']) || empty($nodes['right'])) {
             $html .= '<ul>';
