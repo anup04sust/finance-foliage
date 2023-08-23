@@ -12,6 +12,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     min-width: 100%;
     padding-bottom: 50px;
     overflow: auto;
+    min-height:100vh;
 }
 
 .ff-tree-wrap ul {
@@ -25,7 +26,12 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to ed
     margin: 0;
 
 }
-
+.ff-tree-wrap ul ul ul{
+    display: none;
+}
+.ff-tree-wrap ul.level-root > li > a .view-more{
+    display: none!important;
+}
 .ff-tree-wrap li {
     float: left;
     text-align: center;
@@ -117,11 +123,14 @@ right connector from last child*/
     transition: all 0.5s;
     -webkit-transition: all 0.5s;
     -moz-transition: all 0.5s;
-    overflow: hidden;
+    
+    position: relative;
 
 }
 .ff-tree-wrap li a img{
-    margin: 10px 10px;
+    margin: 5px 5px;
+    width: 32px;
+    height: 32px;
 }
 .ff-tree-wrap li a span{
     display: block;
@@ -141,6 +150,31 @@ right connector from last child*/
     background-color: #28a745;
     color: #ffffff;
 }
+.ff-tree-wrap li a span.view-more{
+    position: absolute;
+    bottom: -29px;
+    width: 16px;
+    height: 16px;
+    display: block;
+    background-color: rgba(255,255,255,.3);
+    border: 1px solid #ccc;
+    left: 50%;
+    margin-left: -8px;
+    color: #ffffff;
+    z-index: 2;
+    border-radius: 100%;
+    padding: 0;
+}
+.ff-tree-wrap li a span.view-more i{
+    line-height: 16px;
+    transition: 1s;
+}
+.ff-tree-wrap li.expanded > a span.view-more i{
+  transform: rotate(180deg);
+}
+.ff-tree-wrap li.expanded > ul{
+    display: flex;
+}
 /*Time for some hover effects*/
 /*We will apply the hover effect the the lineage of the element also*/
 .ff-tree-wrap li a:hover,
@@ -157,7 +191,28 @@ right connector from last child*/
 .ff-tree-wrap li a:hover+ul ul::before {
     border-color: #94a0b4;
 }
-
+#expand-all{
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    width: 50px;
+    height: 50px;
+    border-radius: 100%;
+    text-align: center;
+    z-index: 1;
+    background-color: rgba(00,00,00,.3);
+    border: 1px solid #ccc;
+    color: #fff;
+    >i{
+        transition: 1s;
+        line-height: 50px;
+    }
+    &.expanded{
+        >i{
+            transform: rotate(180deg);
+        }
+    }
+}
 #modal-node-details .modal-content{
     
 }
