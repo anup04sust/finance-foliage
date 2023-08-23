@@ -23,6 +23,7 @@ class FfSetups {
         $this->crateFinanceReportPage();
         $this->crateSynchronization();
         $this->crateAddAgentPage();
+        $this->crateEditAgentPage();
         $this->singleAgentPage();
         $this->addUserRoles();
         
@@ -151,6 +152,23 @@ class FfSetups {
             $page_id = wp_insert_post($pageObj);
 
             $this->setting_options['agentnode_addnew_page_id'] = $page_id;
+        }
+    }
+
+    private function crateEditAgentPage() {
+        $page_slug = 'edit-agent'; // Slug of the Post
+        $pageObj = array(
+            'post_type' => 'page', // Post Type Slug eg: 'page', 'post'
+            'post_title' => 'Edit Agent', // Title of the Content
+            'post_content' => 'edit agent shortcode', // Content
+            'post_status' => 'publish', // Post Status
+            'post_author' => 1, // Post Author ID
+            'post_name' => $page_slug   // Slug of the Post
+        );
+        if (!get_page_by_path($page_slug, OBJECT, 'page')) { // Check If Page Not Exits
+            $page_id = wp_insert_post($pageObj);
+
+            $this->setting_options['agentnode_edit_page_id'] = $page_id;
         }
     }
 

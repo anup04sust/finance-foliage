@@ -2,7 +2,7 @@
 $foliage_settings = get_option('finance_foliage_settings');
 $agentnode_url = get_permalink($foliage_settings['agentnode_single_page_id']);
 $finance_report_url = get_permalink($foliage_settings['finance_report_page_id']);
-$agentnode_edit_url = get_permalink($foliage_settings['agentnode_addnew_page_id']);
+$agentnode_edit_url = get_permalink($foliage_settings['agentnode_edit_page_id']);
 ?>
 <div class="row">
     <div class="col-sm-12">

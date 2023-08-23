@@ -37,6 +37,9 @@ class Shortcodes {
         if (is_page($this->settings['agentnode_addnew_page_id'])) {
             $content = $this->addAgent();
         }
+        if (is_page($this->settings['agentnode_edit_page_id'])) {
+            $content = $this->editAgent();
+        }
         if (is_page($this->settings['agentnode_single_page_id'])) {
            
             $content = $this->viewAgent();
@@ -80,6 +83,12 @@ class Shortcodes {
     private function addAgent() {
         ob_start();
         include_once FINANCE_FOLIGE_DIR . '/views/add-agent.php';
+        return ob_get_clean();
+    }
+
+    private function editAgent() {
+        ob_start();
+        include_once FINANCE_FOLIGE_DIR . '/views/edit-agent.php';
         return ob_get_clean();
     }
 

@@ -199,6 +199,107 @@
             }
         });
     }
+
+    //Edit agent
+    if ($('#form-edit-agent').length > 0) {
+
+        $('#created-at-datetimepicker').datetimepicker({
+            format: 'YYYY-MM-DD'
+        });
+        var message = $('#form-message');
+        message.html('').fadeOut();
+        $('#form-edit-agent').on('submit', function (e) {
+            e.preventDefault();
+            message.text('').fadeOut();
+            var button = $('#form-edit-agent-submit');
+            button.addClass('disabled');
+            var formData = $(this).serialize();
+
+            var agentName = $('#agent-name').val();
+            var ref = $('#agent-referral').val();
+            if (ref === '0') {
+                $('#frontline-wrap').fadeIn('slow');
+
+                if ($('#ref-frontline').is(":visible") && $('#ref-frontline').is(":checked")) {
+                    message.fadeOut('slow').html('');
+                    $.ajax({
+                        type: "POST",
+                        data: formData,
+                        url: financeFoliage.ajaxurl,
+                        success: function (data)
+                        {
+                            message.removeClass('callout-danger').addClass('callout-success');
+                            message.text(agentName + ' updated in system.');
+                            message.fadeIn('slow');
+                            //resetForm();
+                        }
+                    });
+                } else {
+                    message.addClass('callout-danger');
+                    message.text('Please select Referral ID or Plase check Front Line agent.');
+                    message.fadeIn('slow');
+                    button.removeClass('disabled');
+                }
+            } else {
+                $.ajax({
+                    type: "POST",
+                    data: formData,
+                    url: financeFoliage.ajaxurl,
+                    success: function (data)
+                    {
+                        //alert(data);
+                        message.removeClass('callout-danger').addClass('callout-success');
+                        message.text(agentName + ' updated in systemmm');
+                        message.fadeIn('slow');
+
+                        //resetForm();
+                    }
+                });
+            }
+
+            return false;
+        });
+        $('#agent-referral').on('change', function () {
+            var ref = $(this).val();
+            if (ref !== '0') {
+                $.ajax({
+                    type: "POST",
+                    data: {'referral_id': ref, 'action': 'verify_referral'},
+                    url: financeFoliage.ajaxurl,
+                    success: function (response)
+                    {
+                        var returnedData = JSON.parse(response);
+
+                        if (returnedData.status === 200) {
+                            console.log('returnedData.status', returnedData.status);
+                            if (returnedData.left_node === true) {
+                                console.log('returnedData.left_node', returnedData.left_node);
+                                $('#ref-wings-left').prop('disabled', true);
+                                $('#ref-wings-right').prop('checked', true);
+                            } else if (returnedData.right_node === true) {
+                                console.log('returnedData.right_node', returnedData.right_node);
+                                $('#ref-wings-right').prop('disabled', true);
+                                $('#ref-wings-left').prop('checked', true);
+                            } else {
+                                console.log('returnedData', returnedData);
+                                $('#ref-wings-left').prop('checked', true);
+                                $('#ref-wings-right').prop('checked', false);
+                                $('#ref-wings-left').prop('disabled', false);
+                                $('#ref-wings-right').prop('disabled', false);
+                            }
+                        }
+
+                    }
+                });
+            } else {
+                $('#ref-wings-left').prop('checked', true);
+                $('#ref-wings-right').prop('checked', false);
+                $('#ref-wings-left').prop('disabled', false);
+                $('#ref-wings-right').prop('disabled', false);
+            }
+        });
+    }
+
     if ($('.ff-tree-wrap').length > 0) {
         $('.ff-tree-wrap a.node-link').on('click', function (e) {
             e.preventDefault();

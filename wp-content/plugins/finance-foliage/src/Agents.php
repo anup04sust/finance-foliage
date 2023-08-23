@@ -15,6 +15,7 @@ class Agents {
     public function __construct() {
         $this->settings = get_option('finance_foliage_settings');
         add_action("wp_ajax_addnew_agent", [$this, 'addNew']);
+        add_action("wp_ajax_edit_agent", [$this, 'edit']);
         add_action("wp_ajax_verify_referral", [$this, 'verifyReferral']);
         add_action("wp_ajax_import_agents_csv", [$this, 'importCsv']);
         add_action("wp_ajax_sync_agents", [$this, 'syncAgents']);
@@ -50,6 +51,38 @@ class Agents {
             echo wp_json_encode(['message' => 'success', 'status' => 200, 'msg' => $create_user['msg']]);
         } else {
             echo wp_json_encode(['message' => $create_user['msg'], 'status' => 201]);
+        }
+
+        wp_die();
+    }
+
+    public function edit() {
+        //print_r($_POST); die;
+        $aname = esc_attr($_POST['aname']);
+        $created_at = esc_attr($_POST['created_at']);
+        $sl_no = esc_attr($_POST['slno']);
+        $referral = esc_attr($_POST['referral']);
+        $wing = esc_attr($_POST['ref-wings']);
+        $name_array = explode(" ", $aname);
+        $user_login = $sl_no;
+        $user_login .= ($name_array[0]) ? substr($name_array[0], 0, 3) : '';
+        $user_login .= ($name_array[0]) ? substr(end($name_array), 0, 3) : '';
+
+        $user_data['first_name'] = !empty($name_array[0]) ? $name_array[0] : '';
+        $user_data['last_name'] = !empty(end($name_array)) ? end($name_array) : '';
+        $user_data['display_name'] = $aname;
+        $user_data['user_login'] = $user_login;
+        $user_data['email'] = $user_login . '@example.me';
+        $user_data['wing'] = $wing;
+        $user_data['referral'] = $referral;
+        $user_data['created_at'] = strtotime($created_at);
+        $user_data['slno'] = trim($sl_no);
+
+        $update_user = $this->updateWpUser($user_data);
+        if ($update_user['status']) {
+            echo wp_json_encode(['message' => 'success', 'status' => 200, 'msg' => $update_user['msg']]);
+        } else {
+            echo wp_json_encode(['message' => $update_user['msg'], 'status' => 201]);
         }
 
         wp_die();
@@ -98,6 +131,49 @@ class Agents {
             }
         } else {
             return array('status' => false, 'msg' => __('User already exists'));
+        }
+    }
+
+    private function updateWpUser($user_data) {
+
+        $user_id = username_exists($user_data['user_login']);
+        if (!$user_id && false == email_exists($user_data['email'])) {
+    
+            wp_update_user(
+                    array(
+                        'ID' => $user_id,
+                        'first_name' => $user_data['first_name'],
+                        'last_name' => $user_data['last_name'],
+                        'nickname' => $user_data['display_name'],
+                        'display_name' => $user_data['display_name'],
+                    )
+            );
+
+            global $wpdb;
+
+            $alliance_id = $wpdb->update(
+                $this->tableName, 
+                array(
+                    'user_id' => $user_id,
+                    'aid' => $user_data['slno'],
+                    'user_name' => $user_data['display_name'],
+                    'created_at' => $user_data['created_at'],
+                    'parent_node' => $user_data['referral'],
+                    'spos' => !empty($user_data['referral']) ? $user_data['wing'] : '0',
+                ),
+                array(
+                    'aid' => $user_data['slno']
+                )
+            );
+
+            if (!empty($user_data['referral']) && !empty($user_data['wing'])) {
+                $response = $this->updateReferral($user_data['referral'], $user_data['wing'], $user_data['slno']);
+                return array('status' => true, 'msg' => 'Agent updated at level:' . $response);
+            } else {
+                return array('status' => true, 'msg' => 'Agent updated successfully');
+            }
+        } else {
+            return array('status' => false, 'msg' => __('No user exists'));
         }
     }
 
