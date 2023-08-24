@@ -8,6 +8,7 @@ $time_flug = ($bill['bill_type'] == 'daily')? 86400: (($bill['bill_type'] == 'we
 //pprint($bill);
 ?>
 <div class="row">
+    
     <div class="col-sm-12">
 
         <div class="callout callout-danger">
@@ -36,6 +37,9 @@ $time_flug = ($bill['bill_type'] == 'daily')? 86400: (($bill['bill_type'] == 'we
                 <?php endif; ?>
             </div>
         </div>
+    </div>
+    <div class="col-sm-12">
+        <div id="message-wrap" class="alert alert-danger"></div>
     </div>
      <div class="col-sm-12 col-md-6">
         <div class="card card-warning">

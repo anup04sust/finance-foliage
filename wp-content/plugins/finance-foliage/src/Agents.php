@@ -192,18 +192,18 @@ class Agents {
         return $level_count;
     }
 
-    private function updateNodeCount($referral, $wing, $level = 1) {
+    private function updateNodeCount($referral, $wing, $level = 0) {
 
         if (empty($referral)) {
             return $level;
         }
 
         global $wpdb;
-        if ($wing === 'L') {
+        if (!empty($referral) && $wing === 'L') {
             $wpdb->query("UPDATE " . $this->tableName . " SET left_node_count =  left_node_count + 1  WHERE aid=" . $referral);
             //pprint("UPDATE " . $this->tableName . " SET left_node_count =  left_node_count + 1  WHERE aid=" . $referral);
         }
-        if ($wing === 'R') {
+        if (!empty($referral) && $wing === 'R') {
             $wpdb->query("UPDATE " . $this->tableName . " SET right_node_count = right_node_count + 1  WHERE aid=" . $referral);
             //pprint("UPDATE " . $this->tableName . " SET right_node_count = right_node_count + 1  WHERE aid=" . $referral);
         }
@@ -211,10 +211,9 @@ class Agents {
         $node_referral = $wpdb->get_row('SELECT parent_node,spos FROM ' . $this->tableName . ' WHERE  aid=' . $referral);
 
         if (!empty($node_referral)) {
-            return $this->updateNodeCount($node_referral->parent_node, $node_referral->spos, $level++);
-        } else {
-            return $level;
-        }
+            $level = $this->updateNodeCount($node_referral->parent_node, $node_referral->spos, $level++);
+        } 
+         return $level;
     }
 
     /*
@@ -308,28 +307,40 @@ class Agents {
                     $import_status['fail'] += 1;
                 }
             }
-            echo wp_json_encode(array('status' => 200, 'success' => $import_status['success'], 'fail' => $import_status['fail']));
+            echo wp_json_encode(array('status' => 200,'row_count'=>sprintf('Success:%s Fail:%s',$import_status['success'],$import_status['fail'])));
         }
         wp_die();
     }
 
     public function syncAgents() {
+        $request_stime = strtotime('now');
         $sync_status = esc_attr($_POST['sync_status']);
         $bill_duration = esc_attr($_POST['bill_duration']);
         $sync_date = esc_attr($_POST['sync_date']);
-        $this->resetAgentsLevel($sync_date);
         
+        $this->resetAgentsLevel($sync_date);
+        $response = '';
         if ($bill_duration == 'weekly') {
             $bill = ff_get_bill_duration($sync_date);
+            $response = $this->syncNodeCount($bill['week_start'], $bill['week_end']);
             
-            $this->syncNodeCount($bill['week_start'], $bill['week_end']);
         } elseif ($bill_duration == 'monthly') {
+            
             $bill = ff_get_bill_duration($sync_date);
-            $this->syncNodeCount($bill['month_start'], $bill['month_end']);
+            $response = $this->syncNodeCount($bill['month_start'], $bill['month_end']);
+            
         } else {
-            $this->syncNodeCount(strtotime($sync_date), strtotime($sync_date));
+            
+            $response = $this->syncNodeCount(strtotime($sync_date), strtotime($sync_date));
         }
-        echo wp_json_encode(['status' => 200, 'msg' => '']);
+         $request_etime = strtotime('now');
+        echo wp_json_encode(
+                [
+                    'status' => 200, 
+                    'msg' => sprintf('Execution Time:%s-%s',date('Y.m.d H:i:s',$request_stime),date('Y.m.d H:i:s',$request_etime)),
+                    'data'=>$response
+                ]
+                );
         wp_die();
     }
 
@@ -347,10 +358,11 @@ class Agents {
         
         global $wpdb;
         $nodes = $wpdb->get_results('SELECT * FROM ' . $this->tableName . ' WHERE created_at >=' . $sdate . ' AND created_at <=' . $edate);
-        
-        foreach ($nodes as $node) {
-            $nodeCount = $this->updateNodeCount($node->parent_node, $node->spos);
+        $nodeCount = array();
+        foreach ($nodes as $key=>$node) {
+            $nodeCount[$key] = $this->updateNodeCount($node->parent_node, $node->spos);
             // pprint($nodeCount);
         }
+        return array('nodes'=>count($nodes),'update'=>$nodeCount);
     }
 }

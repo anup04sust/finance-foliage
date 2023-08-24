@@ -56,6 +56,7 @@ if (!function_exists('fincance_foliage_init')):
     require_once __DIR__ . '/vendor/autoload.php';
     require_once __DIR__ . '/inc/install/FfSetups.php';
     register_activation_hook(__FILE__, 'fincance_foliage_activate');
+    register_deactivation_hook(__FILE__, 'fincance_foliage_deactivate');
 
     add_action('init', 'fincance_foliage_init', 1);
 
@@ -82,7 +83,10 @@ if (!function_exists('fincance_foliage_init')):
         $install = new FfSetups();
         $install->init();
     }
-
+ function fincance_foliage_deactivate(){
+       $install = new FfSetups();
+       $install->deactivate();
+ }
 
 
 

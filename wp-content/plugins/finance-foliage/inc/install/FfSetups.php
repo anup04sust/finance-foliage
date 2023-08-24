@@ -26,7 +26,6 @@ class FfSetups {
         $this->crateEditAgentPage();
         $this->singleAgentPage();
         $this->addUserRoles();
-        
 
         update_option($this->option_name, $this->setting_options);
 
@@ -223,31 +222,39 @@ class FfSetups {
         global $wpdb;
         $charset_collate = $wpdb->get_charset_collate();
         $table_name = $wpdb->prefix . 'alliance';
-        $sql = "CREATE TABLE " . $table_name . " (
-                    ID bigint NOT NULL,
-                    user_id bigint NOT NULL,
-                    aid int NOT NULL,
-                    user_name varchar(255) NOT NULL,
-                    business_center int NOT NULL DEFAULT '1',
-                    left_node int NOT NULL DEFAULT '0',
-                    right_node int NOT NULL DEFAULT '0',
-                    left_hand_count int NOT NULL DEFAULT '0',
-                    right_hand_count int NOT NULL DEFAULT '0',
-                    parent_node int NOT NULL,
-                    spos enum('L','R','0') NOT NULL DEFAULT '0',
-                    wallet_amount float NOT NULL DEFAULT '0',
-                    updated datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    created_at bigint NOT NULL
-                  ) " . $charset_collate . ";";
-
-        $sql .= "ALTER TABLE " . $table_name . "
-  ADD PRIMARY KEY (ID),
-  ADD KEY parent_node (parent_node);";
-
-        $sql .= "ALTER TABLE " . $table_name . "
-  MODIFY ID bigint NOT NULL AUTO_INCREMENT;";
-       
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
+        try {
+
+            $sql_table = "CREATE TABLE " . $table_name . " (
+  ID bigint NOT NULL AUTO_INCREMENT,
+  user_id bigint NOT NULL,
+  aid varchar(255)  DEFAULT NULL,
+  user_name varchar(255)  NOT NULL,
+  business_center int NOT NULL DEFAULT '1',
+  left_node varchar(255)  DEFAULT NULL,
+  right_node varchar(255)  DEFAULT NULL,
+  left_node_count varchar(255)  DEFAULT NULL,
+  right_node_count varchar(255) DEFAULT NULL,
+  parent_node varchar(255)  DEFAULT NULL,
+  spos enum('L','R','0')  NOT NULL DEFAULT '0',
+  updated datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_at bigint NOT NULL,
+  PRIMARY KEY (ID),
+  INDEX(aid,parent_node,created_at)
+)" . $charset_collate;
+
+            dbDelta($sql_table);
+        } catch (Exception $ex) {
+            wp_die($ex->getMessage());
+        }
+    }
+
+    public function deactivate() {
+         global $wpdb;
+        $table_name = $wpdb->prefix . 'alliance';
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        $sql_drop = "RENAME TABLE ".$table_name." TO ".$table_name."_".strtotime('now').";";
+        $db_status = $wpdb->query($sql_drop);
+               
     }
 }

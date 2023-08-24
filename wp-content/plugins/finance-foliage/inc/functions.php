@@ -90,7 +90,7 @@ function ff_get_agaent_level($agent_info) {
 
                 $response = array(
                     'level' => $settings['level'],
-                    'amount' => $response['amount'] + $settings['level_amount']
+                    'amount' => $settings['level_amount']
                 );
             }
         }
@@ -102,12 +102,11 @@ function ff_get_agaent_level($agent_info) {
 function ff_get_agents_tree($agent_root) {
     global $wpdb;
     $nodes = $wpdb->get_row('SELECT aid FROM ' . $wpdb->prefix . 'alliance' . ' WHERE ID=' . $agent_root);
-    if(!empty($nodes)){
-    $agents_tree_array = ff_generate_tree_array($nodes->aid);
-    $tree_html = ff_generateHtmlTree($agents_tree_array);
+    if (!empty($nodes)) {
+        $agents_tree_array = ff_generate_tree_array($nodes->aid);
+        $tree_html = ff_generateHtmlTree($agents_tree_array);
 
-    return $tree_html;
-    
+        return $tree_html;
     }
 }
 
@@ -135,7 +134,7 @@ function ff_generate_tree_array($agent_root) {
     ];
 }
 
-function ff_generateHtmlTree($nodes,$tree_level=0) {
+function ff_generateHtmlTree($nodes, $tree_level = 0) {
 
     $html = '';
 
@@ -164,9 +163,9 @@ function ff_generateHtmlTree($nodes,$tree_level=0) {
         $html .= '<li><a class="node-link ' . $node_status_class . '" data-all="' . base64_encode(json_encode($modal_data)) . '" data-aid="' . $nodes['node_aid'] . '" data-id="' . $nodes['node_id'] . '" href="#" title="' . $nodes['node'] . '"><img class="img-circle elevation-2" src="' . FINANCE_FOLIGE_DIR_URL . 'assets/images/user-64x64.png" alt="User Avatar"><span>' . $nodes['node_aid'] . '</span><span class="view-more"><i class="fas fa-angle-down"></i></span></a>';
 
         if (!empty($nodes['left']) || !empty($nodes['right'])) {
-            $html .= '<ul class="level level-'.$tree_level.'">';
-            $html .= !empty($nodes['left']) ? ff_generateHtmlTree($nodes['left'],$tree_level++) : ff_add_empty_tree_node($nodes['node_aid'], $nodes['node_id'], 'L');
-            $html .= !empty($nodes['right']) ? ff_generateHtmlTree($nodes['right'],$tree_level++) : ff_add_empty_tree_node($nodes['node_aid'], $nodes['node_id'], 'R');
+            $html .= '<ul class="level level-' . $tree_level . '">';
+            $html .= !empty($nodes['left']) ? ff_generateHtmlTree($nodes['left'], $tree_level++) : ff_add_empty_tree_node($nodes['node_aid'], $nodes['node_id'], 'L');
+            $html .= !empty($nodes['right']) ? ff_generateHtmlTree($nodes['right'], $tree_level++) : ff_add_empty_tree_node($nodes['node_aid'], $nodes['node_id'], 'R');
             $html .= '</ul>';
         } else if (empty($nodes['left']) || empty($nodes['right'])) {
             $html .= '<ul>';
@@ -299,14 +298,14 @@ function ff_get_bill_duration($current_date = '') {
     $options = get_option('finance_foliage_settings');
     $bill_duration = !empty($options['bill_duration']) ? $options['bill_duration'] : 'weekly';
     $week_start_day = !empty($options['bill_week_start_day']) ? $options['bill_week_start_day'] - 1 : 4;
-    if(!empty($current_date)){
-        $current_date = is_int($current_date)?$current_date:strtotime($current_date); 
-    }else if(!empty ($options['sync_date'])){
+    if (!empty($current_date)) {
+        $current_date = is_int($current_date) ? $current_date : strtotime($current_date);
+    } else if (!empty($options['sync_date'])) {
         $current_date = $options['sync_date'];
-    }else{
-        $current_date = strtotime("now"); 
+    } else {
+        $current_date = strtotime("now");
     }
-   
+
 
     $response = array(
         'bill_type' => $bill_duration,
@@ -333,5 +332,20 @@ function ff_get_bill_duration($current_date = '') {
             break;
     }
 
+    return $response;
+}
+
+function ff_get_chield_agents($root, $response = array()) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'alliance';
+    $response[$root->ID] = $root;
+    if (!empty($root->left_node)) {
+        $left_node = $wpdb->get_row('SELECT * FROM ' . $table_name . ' WHERE aid="' . $root->left_node . '"');
+        $response= ff_get_chield_agents($left_node,$response);
+    }
+    if (!empty($root->right_node)) {
+        $right_node = $wpdb->get_row('SELECT * FROM ' . $table_name . ' WHERE aid="' . $root->right_node . '"');
+        $response=ff_get_chield_agents($right_node,$response);
+    }
     return $response;
 }
