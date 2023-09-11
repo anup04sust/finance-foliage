@@ -6,6 +6,7 @@ $param_redirect = !empty($_GET['redirect']) ? esc_attr($_GET['redirect']) : null
 $param_nodeid = !empty($_GET['redirect']) ? esc_attr($_GET['node']) : null;
 $foliage_settings = get_option('finance_foliage_settings');
 $agentnode_edit_url = get_permalink($foliage_settings['agentnode_addnew_page_id']);
+
 ?>
 <div class="row d-flex justify-content-center">
     <div class="col-sm-12 col-md-12 col-lg-8">
@@ -134,7 +135,7 @@ $agentnode_edit_url = get_permalink($foliage_settings['agentnode_addnew_page_id'
                 <?php wp_nonce_field('addnew_agent'); ?>
             </form>
             <!-- /.card -->
-        <?php else : ?>
+        <?php elseif( !empty($_GET['import']) && $_GET['import'] == 'csv' && empty($_GET['action'])) : ?>
             <div class="col">
                 <form class="form-horizontal" method="post" id="form-import-new-agent" enctype="multipart/form-data">
                     <div class="card card-info">
@@ -145,7 +146,8 @@ $agentnode_edit_url = get_permalink($foliage_settings['agentnode_addnew_page_id'
                                     <i class="fas fa-user-plus mr-2"></i> Add new agent
                                 </a>
                                 |
-                                <a href="<?php echo FINANCE_FOLIGE_DIR_URL ?>/sample-csv.csv" target="_blank" class="btn btn-tool  btn-secondary ><i class="fa-solid fa-file-arrow-down mr-2"></i> Sample</a>
+                                <a href="<?php echo FINANCE_FOLIGE_DIR_URL ?>/sample-csv.csv" target="_blank" class="btn btn-tool  btn-secondary" ><i class="fas fa-file-alt mr-2"></i> Sample</a>
+                                <a href="<?php echo $agentnode_edit_url; ?>?import=csv&action=analysis"  class="btn btn-tool  btn-warning" ><i class="fas fa-chart-bar mr-2"></i> Analysis</a>
                             </div>
                         </div>
                         <div class="card-body">
@@ -194,6 +196,54 @@ $agentnode_edit_url = get_permalink($foliage_settings['agentnode_addnew_page_id'
                     <?php wp_nonce_field('addnew_agent'); ?>
                 </form>
             </div>
+        <?php elseif( !empty($_GET['action']) && $_GET['action'] == 'analysis') : ?>
+            <div class="col">
+                <form class="form-horizontal" method="post" id="form-import-analysis-agent" enctype="multipart/form-data">
+                    <div class="card card-info">
+                        <div class="card-header">
+                            <h3 class="card-title">Analysis .csv file</h3>
+                            <div class="card-tools">
+                                <a href="<?php echo $agentnode_edit_url; ?>"  class="btn btn-tool" >
+                                    <i class="fas fa-user-plus mr-2"></i> Add new agent
+                                </a>
+                                |
+                                <a href="<?php echo FINANCE_FOLIGE_DIR_URL ?>/sample-csv.csv" target="_blank" class="btn btn-tool  btn-secondary ><i class="fa-solid fa-file-arrow-down mr-2"></i> Sample</a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-sm-12">
+                                    <div id="form-message" class="callout" style="display: none"></div>
+                                </div>
+                            </div>
+                           
+                            <div class="form-group row">
+                                <label for="csv-agents" class="col-sm-2 col-form-label">Upload .CSV file</label>
+                                <div class="input-group col-sm-10">
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" name="agentcollection" id="csv-agents" accept=".csv" required>
+                                        <label class="custom-file-label" for="csv-agents">Choose file</label>
+                                    </div>
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-primary">Analysis</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="card-footer">
+                            <div  class="form-group row" >
+                                <div class="col-sm-12 load-spin d-flex align-items-center"><img class="spin-img d-none" src="<?php echo get_admin_url() ?>/images/wpspin_light.gif" /></div>
+                                <div class="col-sm-12" id="csv-import-message"></div>
+                            </div>
+                            <div class="analysis-report"></div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="action" value="analysis_agents_csv" />
+                     <?php wp_nonce_field('addnew_agent'); ?>
+                </form>
+            </div>
+       
         <?php endif ?>
         <div class="col">
 

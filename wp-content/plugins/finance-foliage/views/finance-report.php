@@ -18,19 +18,20 @@ if ($bill_duration['bill_type'] == 'weekly') {
     $bill_edate = $bill_duration['bill_date'];
 }
 
-$font_agents = $wpdb->get_results('SELECT * FROM ' . $table_name . ' WHERE parent_node IS NULL OR parent_node =0 ORDER BY ID ASC');
+$font_agents = $wpdb->get_results('SELECT * FROM ' . $table_name . ' WHERE parent_node IS NULL OR parent_node = \'0\' ORDER BY ID ASC');
 
 if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['date-range'] != '' || $_GET['agent-id'] != '')) {
 
     if (!empty($_GET['front-agent']) && $_GET['front-agent'] != 'all') {
         $font_agent = $wpdb->get_row('SELECT * FROM ' . $table_name . ' WHERE aid="' . esc_sql($_GET['front-agent']) . '"');
         $agents = ff_get_chield_agents($font_agent);
+
         $applied_filter['front-agent'] = $font_agent->user_name;
     } else if (!empty($_GET['agent-id'])) {
         $agents = $wpdb->get_results('SELECT * FROM ' . $table_name . ' WHERE aid="' . esc_sql($_GET['agent-id']) . '"');
         $applied_filter['agent-id'] = $_GET['agent-id'];
-    }else{
-        $agents = $wpdb->get_results('SELECT * FROM ' . $table_name . ' ORDER BY ID ASC');  
+    } else {
+        $agents = $wpdb->get_results('SELECT * FROM ' . $table_name . ' ORDER BY ID ASC');
     }
 } else {
 
@@ -43,7 +44,7 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
             <form method="get" id="fincance-filter-form">
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-3">
+                        <div class="col-2">
                             <select name="front-agent" class="form-control">
                                 <option value="all">All Front Agent</option>
                                 <?php
@@ -72,13 +73,14 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
                         <div class="col-2">
                             <input name="agent-id" value="<?php echo @$_GET['agent-id'] ?>" class="form-control" placeholder="agent id"/>
                         </div>
-                        <div class="col-3">
+                        
+                        <div class="col-2">
 
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
                                 </div>
-                                <input data-sdate="<?php echo date('Y/m/d',$bill_sdate); ?>" data-edate="<?php echo date('Y/m/d',$bill_edate); ?>" type="text" class="form-control float-right" id="date-range" name="date-range">
+                                <input data-sdate="<?php echo date('Y/m/d', $bill_sdate); ?>" data-edate="<?php echo date('Y/m/d', $bill_edate); ?>" type="text" class="form-control float-right" id="date-range" name="date-range">
                             </div>
                         </div>
                         <div class="col-2">
@@ -115,36 +117,52 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
             <div class="card-body">
                 <table id="fincance-report-table" class="table table-bordered table-striped">
                     <thead>
+                       
                         <tr>
-                            <th style="width: 20px">Agent ID</th>
+                            <th style="width: 10px">#</th>
+                            <th style="width: 20px">CID</th>
+                            <th style="width: 20px">BC</th>
 
                             <th style="width: 200px">Name</th>
                             <th style="width: 15px">Left</th>
                             <th style="width: 15px">Right</th>
                             <th style="width: 30px">Level</th>
                             <th style="width: 30px">Amount</th>
+                            <th style="width: 30px">Total</th>
                             <th style="width: 40px">Registered</th>
+                            <th style="width: 40px">Cheque/Cash</th>
+                            <th style="width: 40px">Signature/Date</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
                         if (!empty($agents)):
-
+                            $index = 1;
                             foreach ($agents as $agent) {
                                 $level = ff_get_agaent_level($agent);
                                 if (!empty($_GET['level']) && $_GET['level'] != 'all' && $level['level'] !== $_GET['level']) {
                                     continue;
                                 }
+                                if($level['level'] === 0){
+                                  continue;  
+                                }
+                                
                                 $html = '<tr>';
+                                $html .= '<td>' . $index . '</td>';
                                 $html .= '<td>' . $agent->aid . '</td>';
+                                $html .= '<td>' . $agent->business_center . '</td>';
                                 $html .= '<td>' . $agent->user_name . '</td>';
                                 $html .= '<td>' . $agent->left_node_count . '</td>';
                                 $html .= '<td>' . $agent->right_node_count . '</td>';
                                 $html .= '<td>' . $level['level'] . '</td>';
                                 $html .= '<td>' . $level['amount'] . '</td>';
+                                $html .= '<td>' . $level['amount'] . '</td>';
                                 $html .= '<td>' . date("D jS, M Y", $agent->created_at) . '</td>';
+                                $html .= '<td>&nbsp;</td>';
+                                $html .= '<td>&nbsp;</td>';
 
                                 $html .= '</tr>';
+                                $index++;
                                 echo $html;
                             }
                         endif;

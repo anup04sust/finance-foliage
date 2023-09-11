@@ -213,11 +213,18 @@ class Settings {
                 FINANCE_FOLIGE_VER,
                 true
         );
+        wp_enqueue_script(
+                'floating-scroll',
+                FINANCE_FOLIGE_DIR_URL . 'assets/floating-scroll/jquery.floatingscroll.min.js',
+                array('jquery'),
+                FINANCE_FOLIGE_VER,
+                true
+        );
         
         wp_enqueue_script(
                 'ff-dashboard-script',
                 FINANCE_FOLIGE_DIR_URL . 'assets/js/ff-dashboard.js',
-                array('jquery', 'chart.js', 'dataTables.js', 'select2.js', 'moment.js','tempusdominus.js','bs-custom-file-input.js'),
+                array('jquery', 'chart.js', 'dataTables.js', 'select2.js', 'moment.js','tempusdominus.js','bs-custom-file-input.js','floating-scroll'),
                 FINANCE_FOLIGE_VER,
                 true
         );
@@ -232,6 +239,7 @@ class Settings {
         wp_enqueue_style('ff-select2bs-style', FINANCE_FOLIGE_DIR_URL . 'assets/select2-bootstrap4-theme/select2-bootstrap4.min.css', array(), FINANCE_FOLIGE_VER);
         wp_enqueue_style('ff-daterangepicker-style', FINANCE_FOLIGE_DIR_URL . 'assets/daterangepicker/daterangepicker.css', array(), FINANCE_FOLIGE_VER);
         wp_enqueue_style('ff-tempusdominus-style', FINANCE_FOLIGE_DIR_URL . 'assets/tempusdominus/css/tempusdominus-bootstrap-4.min.css', array(), FINANCE_FOLIGE_VER);
+        wp_enqueue_style('ff-fltscroll-style', FINANCE_FOLIGE_DIR_URL . 'assets/floating-scroll/floatingscroll.css', array(), FINANCE_FOLIGE_VER);
         wp_enqueue_style('ff-plugin-style', FINANCE_FOLIGE_DIR_URL . 'assets/css/ff-plugin-style.css', array(), FINANCE_FOLIGE_VER);
     }
 }

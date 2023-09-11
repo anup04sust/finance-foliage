@@ -2,6 +2,7 @@
 $foliage_settings = get_option('finance_foliage_settings');
 $agentnode_url = get_permalink($foliage_settings['agentnode_single_page_id']);
 $finance_report_url = get_permalink($foliage_settings['finance_report_page_id']);
+$agentnode_add_url = get_permalink($foliage_settings['agentnode_addnew_page_id']);
 $agentnode_edit_url = get_permalink($foliage_settings['agentnode_edit_page_id']);
 ?>
 <div class="row">
@@ -11,11 +12,11 @@ $agentnode_edit_url = get_permalink($foliage_settings['agentnode_edit_page_id'])
 
 
                 <div class="card-tools">
-                    <a href="<?php echo $agentnode_edit_url;?>"  class="btn btn-tool" >
+                    <a href="<?php echo $agentnode_add_url;?>"  class="btn btn-tool" >
                         <i class="fas fa-user-plus mr-2"></i> Add new agent
                     </a>
                     |
-                    <a href="<?php echo $agentnode_edit_url;?>?import=csv"  class="btn btn-tool" >
+                    <a href="<?php echo $agentnode_add_url;?>?import=csv"  class="btn btn-tool" >
                         <i class="fas fa-file-upload mr-2 ml-2" ></i> Import From File
                     </a>
                 </div>
@@ -30,8 +31,8 @@ $agentnode_edit_url = get_permalink($foliage_settings['agentnode_edit_page_id'])
                             <th style="width: 200px">Name</th>
                             <th style="width: 15px">Left</th>
                             <th style="width: 15px">Right</th>
-                            <th style="width: 30px">Updated</th>
                             <th style="width: 30px">Registered</th>
+                             <th style="width: 30px">Updated</th>
                             <th style="width: 40px">-</th>
                         </tr>
                     </thead>
@@ -49,8 +50,8 @@ $agentnode_edit_url = get_permalink($foliage_settings['agentnode_edit_page_id'])
                                     <td><?php echo $agent->aid; ?></td>
 
                                             <td><?php echo $agent->user_name; ?></td>
-                                            <td><?php echo $agent->left_node_count; ?></td>
-                                            <td><?php echo $agent->right_node_count; ?></td>
+                                            <td><?php echo $agent->all_node_count_left; ?></td>
+                                            <td><?php echo $agent->all_node_count_right; ?></td>
                                             <td><?php echo date("D jS, M Y", $agent->created_at); ?></td>
                                             <td><?php echo date("D jS, M Y H:i:s", strtotime($agent->updated)); ?></td>
 
@@ -71,18 +72,7 @@ $agentnode_edit_url = get_permalink($foliage_settings['agentnode_edit_page_id'])
                                 endif;
                         ?>
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <th>CID</th>
-                            <th>Name</th>
-                            <th>Left</th>
-                            <th>Right</th>
-                            <th>Registered</th>
-                            <th>Updated</th>
 
-                            <th>-</th>
-                        </tr>
-                    </tfoot>
                 </table>
             </div>
             <!-- /.card-body -->

@@ -10,7 +10,7 @@ if (!empty($agent_id)):
         <div class="col-sm-12">
             <div class="small-box bg-info">
                 <div class="inner">
-                    <div class="ff-tree-wrap">
+                    <div class="ff-tree-wrap" data-fl-scrolls>
                         <ul class="level-root">
                             <?php echo ff_get_agents_tree($agent_id); ?>
                         </ul>
@@ -27,7 +27,7 @@ if (!empty($agent_id)):
     else:
         global $wpdb;
         $table_name = $wpdb->prefix . 'alliance';
-        $front_agents = $wpdb->get_results('SELECT * FROM ' . $table_name . ' WHERE parent_node IS NULL OR parent_node=0 ORDER BY ID ASC');
+        $front_agents = $wpdb->get_results('SELECT * FROM ' . $table_name . ' WHERE parent_node IS NULL OR parent_node=\'0\' ORDER BY ID ASC');
     //pprint($front_agents);
     ?>
     <div class="row d-flex justify-content-center">

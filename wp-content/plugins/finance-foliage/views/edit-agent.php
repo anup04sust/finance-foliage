@@ -32,7 +32,7 @@ $agent = $wpdb->get_row('SELECT * FROM ' . $table_name . ' WHERE ID=' . $agent_i
                             <label for="sl-no" class="col-sm-2 col-form-label">Date:</label>
                             <div class="col-sm-10">
                                 <div class="input-group date" id="reservationdate" data-target-input="nearest">
-                                    <input required type="text" name="created_at" class="form-control datetimepicker-input" data-target="#created_at" id="created_at" value="<?php echo esc_attr(date('Y-m-d', strtotime($agent->created_at))) ?>" readonly/>
+                                    <input required type="text" name="created_at" class="form-control datetimepicker-input" data-target="#created_at" id="created_at" value="<?php echo esc_attr(date('Y-m-d', $agent->created_at)) ?>"/>
                                     <div class="input-group-append" data-target="#created_at" data-toggle="datetimepicker">
                                         <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                     </div>
@@ -43,7 +43,8 @@ $agent = $wpdb->get_row('SELECT * FROM ' . $table_name . ' WHERE ID=' . $agent_i
                         <div class="form-group row">
                             <label for="sl-no" class="col-sm-2 col-form-label">SL No:</label>
                             <div class="col-sm-10">
-                                <input type="text" name="slno" class="form-control" id="agent-sl" value="<?php echo esc_attr($agent->aid) ?>" placeholder="80305" tabindex="1" required readonly>
+                                <input type="hidden" name="old_slno" class="form-control" id="old-agent-sl" value="<?php echo esc_attr($agent->aid) ?>" placeholder="" tabindex="1" required>
+                                <input type="text" name="slno" class="form-control" id="agent-sl" value="<?php echo esc_attr($agent->aid) ?>" placeholder="<?php echo esc_attr($agent->aid) ?>" tabindex="1" required>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -56,28 +57,29 @@ $agent = $wpdb->get_row('SELECT * FROM ' . $table_name . ' WHERE ID=' . $agent_i
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">Referral ID:</label>
                             <div class="col-sm-10">
+                                <input type="text" name="referral" class="form-control" id="referral" value="<?php echo esc_attr($agent->parent_node) ?>" />
                                 <?php $disabled = ($agent->left_node == 0 && $agent->right_node == 0) ? '' : 'readonly'; ?>
-                                <select name="referral" class="form-control select2bs4" id="agent-referral" tabindex="1" <?php echo esc_attr($disabled) ?>>
+<!--                                <select name="referral" class="form-control select2bs4" id="agent-referral" tabindex="1" <?php echo esc_attr($disabled) ?>>
                                     <option value="0">Select Referral</option>
                                     <?php
-                                    $user_options = ff_get_referral_agents();
-                                    foreach ($user_options as $value => $name) {
-
-                                        $selected = (!empty($agent->parent_node) && $value == $agent->parent_node) ? 'selected' : '';
-                                        echo sprintf('<option %3$s value="%1$s">%2$s</option>', $value, $name, $selected);
-                                    }
+//                                    $user_options = ff_get_referral_agents();
+//                                    foreach ($user_options as $value => $name) {
+//
+//                                        $selected = (!empty($agent->parent_node) && $value == $agent->parent_node) ? 'selected' : '';
+//                                        echo sprintf('<option %3$s value="%1$s">%2$s</option>', $value, $name, $selected);
+//                                    }
                                     ?>
-                                </select>
+                                </select>-->
                             </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label">Wings:</label>
                             <div class="col-sm-10 d-flex justify-content-between">
-                                <?php if (!empty($param_wing)): ?>
+                                <?php if (!empty($agent->spos)): ?>
                                     <div class="custom-control custom-radio">
                                         <input 
                                         <?php
-                                        if ($param_wing === 'L') {
+                                        if ($agent->spos === 'L') {
                                             echo 'checked';
                                         } else {
                                             echo 'disabled';
@@ -88,7 +90,7 @@ $agent = $wpdb->get_row('SELECT * FROM ' . $table_name . ' WHERE ID=' . $agent_i
                                     <div class="custom-control custom-radio">
                                         <input  
                                         <?php
-                                        if ($param_wing === 'R') {
+                                        if ($agent->spos === 'R') {
                                             echo 'checked';
                                         } else {
                                             echo 'disabled';

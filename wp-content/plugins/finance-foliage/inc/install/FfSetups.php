@@ -233,8 +233,8 @@ class FfSetups {
   business_center int NOT NULL DEFAULT '1',
   left_node varchar(255)  DEFAULT NULL,
   right_node varchar(255)  DEFAULT NULL,
-  left_node_count varchar(255)  DEFAULT NULL,
-  right_node_count varchar(255) DEFAULT NULL,
+  left_node_count varchar(255)  DEFAULT '0',
+  right_node_count varchar(255) DEFAULT '0',
   parent_node varchar(255)  DEFAULT NULL,
   spos enum('L','R','0')  NOT NULL DEFAULT '0',
   updated datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -255,6 +255,15 @@ class FfSetups {
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         $sql_drop = "RENAME TABLE ".$table_name." TO ".$table_name."_".strtotime('now').";";
         $db_status = $wpdb->query($sql_drop);
+        $this->removeWPUser();
                
+    }
+    private function removeWPUser() {
+        require_once( ABSPATH . 'wp-admin/includes/user.php' );
+        $users = get_users( array( 'role' => array( 'finance_agent' ) ) );
+        //Delete all the user of the specified role
+	foreach ( $users as $user ) {
+		wp_delete_user( $user->ID );
+	}
     }
 }

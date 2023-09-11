@@ -1,9 +1,21 @@
 <?php
 
+// set the default timezone to use.
+date_default_timezone_set('ASIA/DHAKA');
 /*
  * Here comes the text of your license
  * Each line should be prefixed with  * 
  */
+
+function ff_filelog($type, $log_msg) {
+    $log_filename = FINANCE_FOLIGE_DIR . "/logs";
+    if (!file_exists($log_filename)) {
+        // create directory/folder uploads.
+        mkdir($log_filename, 0777, true);
+    }
+    $log_file = $log_filename . '/' . date('Ymd') . '.log';
+    file_put_contents($log_file, date('H:i:s') . '-' . $type . ':' . $log_msg . "\n", FILE_APPEND);
+}
 
 function ff_getrandomstring($length) {
 
@@ -30,7 +42,7 @@ function ff_get_referral_agents() {
     $agents_options = [];
     global $wpdb;
 
-    $referral_nodes = $wpdb->get_results('SELECT aid,user_name FROM ' . $wpdb->prefix . 'alliance' . ' WHERE left_node=0 OR  right_node=0 ORDER BY user_name ASC');
+    $referral_nodes = $wpdb->get_results("SELECT aid,user_name FROM " . $wpdb->prefix . "alliance  WHERE (left_node IS NULL OR left_node='0') OR (right_node IS NULL OR right_node='0')  ORDER BY user_name ASC");
     if (!empty($referral_nodes)) {
         foreach ($referral_nodes as $node) {
             $agents_options[$node->aid] = $node->user_name . '(' . $node->aid . ')';
@@ -101,9 +113,10 @@ function ff_get_agaent_level($agent_info) {
 
 function ff_get_agents_tree($agent_root) {
     global $wpdb;
-    $nodes = $wpdb->get_row('SELECT aid FROM ' . $wpdb->prefix . 'alliance' . ' WHERE ID=' . $agent_root);
+    $nodes = $wpdb->get_row('SELECT aid FROM ' . $wpdb->prefix . 'alliance' . ' WHERE ID="' . $agent_root . '"');
     if (!empty($nodes)) {
         $agents_tree_array = ff_generate_tree_array($nodes->aid);
+
         $tree_html = ff_generateHtmlTree($agents_tree_array);
 
         return $tree_html;
@@ -116,16 +129,19 @@ function ff_generate_tree_array($agent_root) {
         return [];
     }
     global $wpdb;
-    $nodes = $wpdb->get_row('SELECT * FROM ' . $wpdb->prefix . 'alliance' . ' WHERE aid=' . $agent_root);
-
-    $leftArray = ff_generate_tree_array($nodes->left_node);
-    $rightArray = ff_generate_tree_array($nodes->right_node);
+    $nodes = $wpdb->get_row("SELECT * FROM " . $wpdb->prefix . "alliance" . " WHERE aid='" . $agent_root . "'");
+    $left_node = !empty($nodes->left_node) ? $nodes->left_node : 0;
+    $right_node = !empty($nodes->right_node) ? $nodes->right_node : 0;
+    $leftArray = ff_generate_tree_array($left_node);
+    $rightArray = ff_generate_tree_array($right_node);
     return [
         'node_aid' => $nodes->aid,
         'node_id' => $nodes->ID,
         'node' => $nodes->user_name,
         'left_node_count' => $nodes->left_node_count,
         'right_node_count' => $nodes->right_node_count,
+        'all_node_count_left' => $nodes->all_node_count_left,
+        'all_node_count_right' => $nodes->all_node_count_right,
         'left' => $leftArray,
         'right' => $rightArray,
         'created_at' => $nodes->created_at,
@@ -147,6 +163,8 @@ function ff_generateHtmlTree($nodes, $tree_level = 0) {
             'node' => $nodes['node'],
             'left_node_count' => $nodes['left_node_count'],
             'right_node_count' => $nodes['right_node_count'],
+            'all_node_count_left' => $nodes['all_node_count_left'],
+            'all_node_count_right' => $nodes['all_node_count_right'],
             'created_str' => $nodes['created_str'],
             'level' => $nodes['level']
         );
@@ -341,11 +359,30 @@ function ff_get_chield_agents($root, $response = array()) {
     $response[$root->ID] = $root;
     if (!empty($root->left_node)) {
         $left_node = $wpdb->get_row('SELECT * FROM ' . $table_name . ' WHERE aid="' . $root->left_node . '"');
-        $response= ff_get_chield_agents($left_node,$response);
+        $response = ff_get_chield_agents($left_node, $response);
     }
     if (!empty($root->right_node)) {
         $right_node = $wpdb->get_row('SELECT * FROM ' . $table_name . ' WHERE aid="' . $root->right_node . '"');
-        $response=ff_get_chield_agents($right_node,$response);
+        $response = ff_get_chield_agents($right_node, $response);
     }
     return $response;
+}
+
+function get_sync_progress() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'alliance';
+    $status = $wpdb->get_results("SELECT count(ID) as sync_count,update_status FROM " . $table_name . " WHERE parent_node !='0'  GROUP BY update_status");
+    $sync_count = 0;
+   
+    $none_sync_status = 0;
+    foreach ($status as $count) {
+        if ($count->update_status === '1') {
+            $sync_count = $count->sync_count;
+        }
+        if ($count->update_status === '0') {
+            $none_sync_status = $count->sync_count;
+        }
+    }
+    $persent = (($sync_count + $none_sync_status) > 0) ? (($sync_count * 100) / ($sync_count + $none_sync_status)) : 0;
+    return ceil($persent);
 }

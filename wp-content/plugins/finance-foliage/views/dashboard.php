@@ -1,9 +1,10 @@
 <?php
 global $wpdb;
 $table_name = $wpdb->prefix . 'alliance';
+$settings = get_option('finance_foliage_settings');
 $week = ff_week_start_end();
 $prev_week = ff_week_start_end(date('Y-m-d', strtotime("-6 days")));
-$front_agents = $wpdb->get_results('SELECT user_name,aid,user_id FROM ' . $table_name . ' WHERE parent_node IS NULL OR parent_node=0 ORDER BY ID ASC');
+$front_agents = $wpdb->get_results('SELECT user_name,aid,user_id FROM ' . $table_name . ' WHERE parent_node IS NULL OR parent_node=\'0\' ORDER BY ID ASC');
 $agents = $wpdb->get_results('SELECT * FROM ' . $table_name);
 $agents_count_cweek = $wpdb->get_results('SELECT COUNT(user_id) as total_agent,created_at FROM ' . $table_name . ' WHERE created_at >=' . $week['start'] . ' AND created_at <=' . $week['end'] . ' GROUP BY created_at');
 $agents_count_pweek = $wpdb->get_results('SELECT COUNT(user_id) as total_agent,created_at FROM ' . $table_name . ' WHERE created_at >=' . $prev_week['start'] . ' AND created_at <=' . $prev_week['end'] . ' GROUP BY created_at');
@@ -73,7 +74,7 @@ if (!empty($agents_count_cweek)) {
             <div class="icon">
                 <i class="fas fa-users"></i>
             </div>
-            <a href="<?php echo get_permalink($settings['agentnodes_page_id']); ?>?aggents-circle=1" class="small-box-footer">
+            <a href="<?php echo get_permalink($settings['agentnode_single_page_id']); ?>?view=tree&node=0" class="small-box-footer">
                 More info <i class="fas fa-arrow-circle-right"></i>
             </a>
         </div>
@@ -91,7 +92,7 @@ if (!empty($agents_count_cweek)) {
             <div class="icon">
                 <i class="fas fa-user-plus"></i>
             </div>
-            <a href="#" class="small-box-footer">
+            <a href="<?php echo get_permalink($settings['agentnodes_page_id']); ?>" class="small-box-footer">
                 More info <i class="fas fa-arrow-circle-right"></i>
             </a>
         </div>
@@ -108,7 +109,7 @@ if (!empty($agents_count_cweek)) {
             <div class="icon">
                 <i class="fas fa-project-diagram"></i>
             </div>
-            <a href="#" class="small-box-footer">
+            <a href="<?php echo get_permalink($settings['finance_report_page_id']); ?>" class="small-box-footer">
                 More info <i class="fas fa-arrow-circle-right"></i>
             </a>
         </div>

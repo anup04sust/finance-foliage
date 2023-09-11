@@ -167,10 +167,11 @@
                 $.ajax({
                     type: "POST",
                     data: {'referral_id': ref, 'action': 'verify_referral'},
+                    dataType: "JSON",
                     url: financeFoliage.ajaxurl,
-                    success: function (response)
+                    success: function (returnedData)
                     {
-                        var returnedData = JSON.parse(response);
+
 
                         if (returnedData.status === 200) {
                             console.log('returnedData.status', returnedData.status);
@@ -228,6 +229,7 @@
                         type: "POST",
                         data: formData,
                         url: financeFoliage.ajaxurl,
+                        dataType: "JSON",
                         success: function (data)
                         {
                             message.removeClass('callout-danger').addClass('callout-success');
@@ -246,6 +248,7 @@
                 $.ajax({
                     type: "POST",
                     data: formData,
+                    dataType: "JSON",
                     url: financeFoliage.ajaxurl,
                     success: function (data)
                     {
@@ -266,11 +269,11 @@
             if (ref !== '0') {
                 $.ajax({
                     type: "POST",
+                    dataType: "JSON",
                     data: {'referral_id': ref, 'action': 'verify_referral'},
                     url: financeFoliage.ajaxurl,
-                    success: function (response)
+                    success: function (returnedData)
                     {
-                        var returnedData = JSON.parse(response);
 
                         if (returnedData.status === 200) {
                             console.log('returnedData.status', returnedData.status);
@@ -310,8 +313,8 @@
             var nodeData = JSON.parse(atob(nodeJson));
             $('#modal-node-details .n-name').text(nodeData.node);
             $('#modal-node-details .n-aid').text(nodeData.node_aid);
-            $('#modal-node-details .ln-count').text(nodeData.left_node_count);
-            $('#modal-node-details .rn-count').text(nodeData.right_node_count);
+            $('#modal-node-details .ln-count').text(nodeData.all_node_count_left + '|' + nodeData.left_node_count);
+            $('#modal-node-details .rn-count').text(nodeData.all_node_count_right + '|' + nodeData.right_node_count);
             $('#modal-node-details .date-registered').text(nodeData.created_str);
             $('#modal-node-details .level-number').text(nodeData.level.level);
             $('#modal-node-details').modal('show');
@@ -327,10 +330,14 @@
             e.preventDefault();
             if ($(this).hasClass('expanded')) {
                 $('.ff-tree-wrap ul.level li').removeClass('expanded');
+
+
             } else {
                 $('.ff-tree-wrap ul.level li').addClass('expanded');
             }
             $(this).toggleClass('expanded');
+
+            $(".ff-tree-wrap").floatingScroll("update");
             return false;
         });
     }
@@ -407,16 +414,23 @@
                 url: financeFoliage.ajaxurl,
                 success: function (res)
                 {
-                    
+                    console.log(res);
                     if (res.status === 200) {
-                        $('#csv-import-wrap .col-form-label').html('Total agent found: ' + data.row_count);
+                        $('#csv-import-wrap .col-form-label').html('Total agent found: ' + res.row_count);
                         $('#csv-import-wrap').fadeIn('slow');
                         $('#csv-import-wrap .load-spin .spin-img').addClass('d-none');
                         $('#form-import-new-agent .btn').prop('disabled', false);
-                        
-                    }else{
-                        alert('405:Execution error!! Reload page and try again');
+
+                    } else {
+                        $('#csv-import-wrap .load-spin .spin-img').addClass('d-none');
+                        alert('405:Execution error!! Partial data inserted, please check agent list');
                     }
+                },
+                error: function (request, status, error) {
+                    console.log('request', request);
+                    console.log('status', status);
+                    console.log('error', error);
+                    alert(status + '!![' + error + '] Partial data inserted, please check agent list');
                 }
             });
             return false;
@@ -426,7 +440,8 @@
         $('#sync-date-picker').datetimepicker({
             format: 'YYYY-MM-DD'
         });
-        $('form.agent-sync-form').on('submit', function (e) {
+        $('#message-wrap').fadeOut();
+        $('#active-sync,#custom-sync').on('submit', function (e) {
             $('#message-wrap').text('');
             var formData = $(this).serialize();
             var _btn = $(this).find('.btn');
@@ -444,12 +459,42 @@
                     if (res.status === 200) {
                         _loader.addClass('d-none');
                         _btn.prop('disabled', false);
-                        if(res.data){
+                        if (res.data) {
                             console.dir(res.data);
                         }
-                       $('#message-wrap').text(res.msg);
-                    }else{
-                        alert('405:Execution error!! Reload page and try again');
+                        $('#message-wrap').text(res.msg).fadeIn('slow');
+                    } else {
+                        location.reload();
+                    }
+
+
+                }
+            });
+
+            return false;
+        });
+        $('#all-agent-sync').on('submit', function (e) {
+            $('#message-wrap').text('');
+            var formData = $(this).serialize();
+            var _btn = $(this).find('.btn');
+            var _loader = $(this).find('.spin-img');
+            _loader.removeClass('d-none');
+            _btn.prop('disabled', true);
+            $.ajax({
+                type: "POST",
+                data: formData,
+                dataType: "JSON",
+                cache: false,
+                url: financeFoliage.ajaxurl,
+                success: function (res)
+                {
+                    if (res.status === 200) {
+                        _loader.addClass('d-none');
+                        _btn.prop('disabled', false);
+                        $('#all-agent-sync .progress-bar').width(res.progress + '%');
+                        $('#sync-progress-label').text('Progress ' + res.progress + '%');
+                    } else {
+                        location.reload();
                     }
 
 
@@ -460,7 +505,7 @@
         });
     }
     if ($('#fincance-filter-form').length > 0) {
-        
+
         var sdate = moment($('#date-range').data('sdate'));
         var edate = moment($('#date-range').data('edate'));
         $('#date-range').daterangepicker({
@@ -472,12 +517,58 @@
             }
         });
     }
-    if($('#agent-datatable').length>0){
-      $("#agent-datatable").DataTable({
+    if ($('#agent-datatable').length > 0) {
+        $("#agent-datatable").DataTable({
             "responsive": false,
             "lengthChange": false,
             "autoWidth": false,
-           
-        });   
+
+        });
+    }
+    if ($('#form-import-analysis-agent').length > 0) {
+        bsCustomFileInput.init();
+        $('#form-import-analysis-agent').on('submit', function () {
+            var myForm = $('#form-import-analysis-agent');
+            $('#form-import-analysis-agent .btn').prop('disabled', true);
+            $('#form-import-analysis-agent .load-spin .spin-img').removeClass('d-none');
+            var formData = new FormData(myForm[0]);
+            var resHtml = '';
+            $('#csv-import-message').html(resHtml);
+            formData.append('import-btn', true);
+            $.ajax({
+                type: "POST",
+                data: formData,
+                dataType: "JSON",
+                cache: false,
+                processData: false,
+                contentType: false,
+                enctype: 'multipart/form-data',
+                url: financeFoliage.ajaxurl,
+                success: function (res)
+                {
+                    console.log('res', res);
+                    if (res.status === 200) {
+                        $.map(res.report, function (msg) {
+                            resHtml += '<p class="alert alert-' + msg.status + '">' + msg.msg + '</p>';
+                        });
+                        $('#csv-import-message').html(resHtml);
+//
+                        $('#form-import-analysis-agent .load-spin .spin-img').addClass('d-none');
+                        $('#form-import-analysis-agent .btn').prop('disabled', false);
+
+                    }
+                },
+                error: function (request, status, error) {
+                    location.reload();
+                }
+            });
+            return false;
+        });
+    }
+    if ($('.ff-tree-wrap').length > 0) {
+        $(document).ready(function () {
+            $('.ff-tree-wrap').floatingScroll();
+        });
+
     }
 })(jQuery);
