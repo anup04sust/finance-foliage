@@ -23,7 +23,7 @@ return [
             'std' => $options['finance_foliage_levels'],
             'fields'     => [
                 [
-                    'type' => 'number',
+                    'type' => 'text',
                     'id'   => 'level',
                     'name' => esc_attr__('Level', 'finance-foliage'),
                     'attributes' => [

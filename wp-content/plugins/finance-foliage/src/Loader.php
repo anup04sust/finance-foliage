@@ -17,9 +17,10 @@ class Loader {
         $this->init();
     }
     private function init() {
-        //TODO
+       
         new Settings();
         new Shortcodes();
         new Agents();
+        new Finance();
     }
 }

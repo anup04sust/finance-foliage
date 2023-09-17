@@ -58,42 +58,7 @@ function ff_get_referral_agents() {
 
 function ff_get_agaent_level($agent_info) {
     $options = get_option('finance_foliage_settings');
-    if (empty($options['finance_foliage_levels'])) {
-        $finance_levels = array(
-            array(
-                'level' => 1,
-                'left_node' => 1,
-                'right_node' => 1,
-                'amount' => 1440
-            ),
-            array(
-                'level' => 2,
-                'left_node' => 2,
-                'right_node' => 2,
-                'amount' => 2250
-            ),
-            array(
-                'level' => 3,
-                'left_node' => 4,
-                'right_node' => 4,
-                'amount' => 4320
-            ),
-            array(
-                'level' => 4,
-                'left_node' => 8,
-                'right_node' => 8,
-                'amount' => 8640
-            ),
-            array(
-                'level' => 5,
-                'left_node' => 15,
-                'right_node' => 15,
-                'amount' => 16650
-            ),
-        );
-    } else {
-        $finance_levels = $options['finance_foliage_levels'];
-    }
+    $finance_levels = $options['finance_foliage_levels'];
     $response = array('level' => 0, 'amount' => 0);
     if (!empty($agent_info->left_node_count) && !empty($agent_info->right_node_count)) {
         foreach ($finance_levels as $settings) {
@@ -104,6 +69,31 @@ function ff_get_agaent_level($agent_info) {
                     'level' => $settings['level'],
                     'amount' => $settings['level_amount']
                 );
+            }
+        }
+    }
+
+    return $response;
+}
+
+function ff_financial_level($agent_info) {
+    $options = get_option('finance_foliage_settings');
+    $finance_levels = $options['finance_foliage_levels'];
+    global $wpdb;
+    $response = array();
+    if (!empty($agent_info->all_node_count_left) && !empty($agent_info->all_node_count_right)) {
+        foreach ($finance_levels as $settings) {
+
+            if ($agent_info->all_node_count_left >= $settings['left_node'] && $agent_info->all_node_count_right >= $settings['right_node']) {
+                $finance_status = $wpdb->get_row('SELECT * FROM ' . $wpdb->prefix . 'finance' . ' WHERE aid="' . $agent_info->aid . '" AND level="' . $settings['level'] . '"');
+                if (empty($finance_status)) {
+                    $response[$settings['level']] = array(
+                        'level' => $settings['level'],
+                        'amount' => $settings['level_amount'],
+                        'left' => $settings['left_node'],
+                        'right' => $settings['right_node'],
+                    );
+                }
             }
         }
     }
@@ -373,7 +363,7 @@ function get_sync_progress() {
     $table_name = $wpdb->prefix . 'alliance';
     $status = $wpdb->get_results("SELECT count(ID) as sync_count,update_status FROM " . $table_name . " WHERE parent_node !='0'  GROUP BY update_status");
     $sync_count = 0;
-   
+
     $none_sync_status = 0;
     foreach ($status as $count) {
         if ($count->update_status === '1') {
