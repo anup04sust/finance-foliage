@@ -78,20 +78,19 @@
 //                options: barChartOptions
 //            });
 //        }
-        if ($('#fincance-report-table').length) {
-//            function buildDatatable() {
-//                $("#fincance-report-table").DataTable({
-//                    responsive: true,
-//                    lengthChange: false,
-//                    autoWidth: false,
-//                    pageLength: 50,
-//                    buttons: ["excel", "print", 'pdf'],
-//                    order: [[1, 'asc']],
-//                    retrieve: true,
-//                    columns: [{orderable: false}, null, null, null, null, null, null, null, null, null, null, {orderable: false}, {orderable: false}]
-//                }).buttons().container().appendTo('#fincance-report-table_wrapper .col-md-6:eq(0)');
-//            }
-//buildDatatable();
+        if ($('#fincance-report-table').length>0) {
+
+            $("#fincance-report-table").DataTable({
+                responsive: true,
+                lengthChange: false,
+                autoWidth: false,
+                pageLength: 50,
+                buttons: ["excel", "print", 'pdf'],
+               
+               
+            }).buttons().container().appendTo('#fincance-report-table_wrapper .col-md-6:eq(0)');
+        }
+        if ($('form#finance-dispatch').length>0) {
             $('form#finance-dispatch').on('submit', function (e) {
                 e.preventDefault();
                 var loader = $(this).find('.spin-img');
@@ -107,10 +106,10 @@
                     url: financeFoliage.ajaxurl,
                     success: function (res)
                     {
-                        console.log('res', res);
+                        // console.log('res', res);
 
                         if (res.status === '200') {
-                            console.log('datalength', res.data.length);
+                            //console.log('datalength', res.data.length);
                             if (res.data.length > 0) {
 
                                 $.map(res.data, function (agent, index) {
@@ -118,15 +117,17 @@
                                     $('.data-row[data-aid="' + agent.aid + '"]').removeClass('bg-purple');
                                     $('.data-row[data-aid="' + agent.aid + '"]').addClass('bg-olive disabled');
                                     var ptyle = $('.data-row[data-aid="' + agent.aid + '"]').find('.ptype').text(agent.ptype);
-                                   
+
                                 });
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 2000);
 
                             }
                         } else {
                             alert(res.msg);
                         }
-                        loader.addClass('d-none');
-                        btnSubmit.prop('disabled', false);
+
                     }
                 });
                 return false;
@@ -183,13 +184,11 @@
                         $.ajax({
                             type: "POST",
                             data: formData,
+                            dataType: "JSON",
                             url: financeFoliage.ajaxurl,
-                            success: function (data)
+                            success: function (res)
                             {
-                                message.removeClass('callout-danger').addClass('callout-success');
-                                message.text(agentName + ' added in system.');
-                                message.fadeIn('slow');
-                                resetForm();
+                                location.reload();
                             }
                         });
                     } else {
@@ -202,15 +201,12 @@
                     $.ajax({
                         type: "POST",
                         data: formData,
+                        data: formData,
                         url: financeFoliage.ajaxurl,
                         success: function (data)
                         {
                             //alert(data);
-                            message.removeClass('callout-danger').addClass('callout-success');
-                            message.text(agentName + ' added in system');
-                            message.fadeIn('slow');
-
-                            resetForm();
+                            location.reload();
                         }
                     });
                 }

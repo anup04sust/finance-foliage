@@ -50,6 +50,9 @@ class Shortcodes {
         if (is_page($this->settings['finance_report_page_id'])) {
             $content = $this->financeReports();
         }
+        if (is_page($this->settings['finance_payment_page_id'])) {
+            $content = $this->financePayments();
+        }
         if (is_page($this->settings['node_sync_page_id'])) {
             $content = $this->configSync();
         }
@@ -113,6 +116,11 @@ class Shortcodes {
     private function financeReports() {
         ob_start();
         include_once FINANCE_FOLIGE_DIR . '/views/finance-report.php';
+        return ob_get_clean();
+    }
+    private function financePayments() {
+        ob_start();
+        include_once FINANCE_FOLIGE_DIR . '/views/finance-payments.php';
         return ob_get_clean();
     }
     private function configSync() {

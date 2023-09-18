@@ -65,6 +65,14 @@ $settings = get_option('finance_foliage_settings');
 
                 </li>
                 <li class="nav-item">
+                    <a href="<?php echo get_permalink($settings['finance_payment_page_id']); ?>" class="nav-link <?php if (is_page($settings['finance_payment_page_id'])) echo 'active'; ?>">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <p>
+                            Make Payment
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="<?php echo get_permalink($settings['finance_report_page_id']); ?>" class="nav-link <?php if (is_page($settings['finance_report_page_id'])) echo 'active'; ?>">
                         <i class="fas fa-chart-pie mr-1"></i>
                         <p>

@@ -21,6 +21,7 @@ class FfSetups {
         $this->crateSettingsPage();
         $this->crateAgentNodesPage();
         $this->crateFinanceReportPage();
+        $this->crateFinancePaymentPage();
         $this->crateSynchronization();
         $this->crateAddAgentPage();
         $this->crateEditAgentPage();
@@ -117,6 +118,22 @@ class FfSetups {
             $page_id = wp_insert_post($pageObj);
 
             $this->setting_options['finance_report_page_id'] = $page_id;
+        }
+    }
+    private function crateFinancePaymentPage() {
+        $page_slug = 'finance-payment'; // Slug of the Post
+        $pageObj = array(
+            'post_type' => 'page', // Post Type Slug eg: 'page', 'post'
+            'post_title' => 'Finance Payment', // Title of the Content
+            'post_content' => 'finance-report shortcode', // Content
+            'post_status' => 'publish', // Post Status
+            'post_author' => 1, // Post Author ID
+            'post_name' => $page_slug   // Slug of the Post
+        );
+        if (!get_page_by_path($page_slug, OBJECT, 'page')) { // Check If Page Not Exits
+            $page_id = wp_insert_post($pageObj);
+
+            $this->setting_options['finance_payment_page_id'] = $page_id;
         }
     }
 

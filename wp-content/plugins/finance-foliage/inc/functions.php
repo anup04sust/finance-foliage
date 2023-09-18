@@ -16,7 +16,19 @@ function ff_filelog($type, $log_msg) {
     $log_file = $log_filename . '/' . date('Ymd') . '.log';
     file_put_contents($log_file, date('H:i:s') . '-' . $type . ':' . $log_msg . "\n", FILE_APPEND);
 }
-
+function ff_setflash_message($message,$type='success'){
+    if(!empty($_SESSION['ff_flash_msg'])){
+        unset($_SESSION['ff_flash_msg']);
+    }
+    $_SESSION['ff_flash_msg'] = serialize(array('msg'=>$message,'type'=>$type));
+}
+function ff_getflash_message(){
+   
+     $message = ($_SESSION['ff_flash_msg'])? unserialize($_SESSION['ff_flash_msg']):null;
+     unset($_SESSION['ff_flash_msg']);
+     return $message;
+    
+}
 function ff_getrandomstring($length) {
 
     global $template;
@@ -61,10 +73,12 @@ function ff_get_agaent_level($agent_info) {
     $finance_levels = $options['finance_foliage_levels'];
     $response = array('level' => 0, 'amount' => 0);
     if (!empty($agent_info->left_node_count) && !empty($agent_info->right_node_count)) {
+        $left = 0;
+        $right = 0;
         foreach ($finance_levels as $settings) {
-
-            if ($agent_info->left_node_count >= $settings['left_node'] && $agent_info->right_node_count >= $settings['right_node']) {
-
+   $left += $settings['left_node'];
+            $right += $settings['right_node'];
+            if ($agent_info->left_node_count >= $left && $agent_info->right_node_count >= $right) {
                 $response = array(
                     'level' => $settings['level'],
                     'amount' => $settings['level_amount']
@@ -79,21 +93,22 @@ function ff_get_agaent_level($agent_info) {
 function ff_financial_level($agent_info) {
     $options = get_option('finance_foliage_settings');
     $finance_levels = $options['finance_foliage_levels'];
-    global $wpdb;
+    
     $response = array();
-    if (!empty($agent_info->all_node_count_left) && !empty($agent_info->all_node_count_right)) {
+    if (!empty($agent_info->left_node_count) && !empty($agent_info->right_node_count)) {
+        $left = 0;
+        $right = 0;
         foreach ($finance_levels as $settings) {
-
-            if ($agent_info->all_node_count_left >= $settings['left_node'] && $agent_info->all_node_count_right >= $settings['right_node']) {
-                $finance_status = $wpdb->get_row('SELECT * FROM ' . $wpdb->prefix . 'finance' . ' WHERE aid="' . $agent_info->aid . '" AND level="' . $settings['level'] . '"');
-                if (empty($finance_status)) {
-                    $response[$settings['level']] = array(
+            $left += $settings['left_node'];
+            $right += $settings['right_node'];
+            if ($agent_info->left_node_count >= $left && $agent_info->right_node_count >= $right) {
+               // $finance_status = $wpdb->get_row('SELECT * FROM ' . $wpdb->prefix . 'finance' . ' WHERE aid="' . $agent_info->aid . '" AND level="' . $settings['level'] . '"');
+                $response[$settings['level']] = array(
                         'level' => $settings['level'],
                         'amount' => $settings['level_amount'],
                         'left' => $settings['left_node'],
                         'right' => $settings['right_node'],
                     );
-                }
             }
         }
     }

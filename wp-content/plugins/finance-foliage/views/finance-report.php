@@ -4,7 +4,8 @@ $foliage_settings = get_option('finance_foliage_settings');
 $agent_url = get_permalink($foliage_settings['agentnode_single_page_id']);
 
 global $wpdb;
-$table_name = $wpdb->prefix . 'alliance';
+$table_alliance = $wpdb->prefix . 'alliance';
+$table_finance = $wpdb->prefix . 'finance';
 $applied_filter = array();
 $bill_duration = ff_get_bill_duration();
 if ($bill_duration['bill_type'] == 'weekly') {
@@ -18,25 +19,34 @@ if ($bill_duration['bill_type'] == 'weekly') {
     $bill_edate = $bill_duration['bill_date'];
 }
 
-$font_agents = $wpdb->get_results('SELECT * FROM ' . $table_name . ' WHERE parent_node IS NULL OR parent_node = \'0\' ORDER BY ID ASC');
+$font_agents = $wpdb->get_results('SELECT * FROM ' . $table_alliance . ' WHERE parent_node IS NULL OR parent_node = \'0\' ORDER BY ID ASC');
+
+$reportQuery = "SELECT f.aid,SUM(f.amount) as total, GROUP_CONCAT(f.amount SEPARATOR ',') as amounts,GROUP_CONCAT(f.level SEPARATOR ',') as levels, f.created_at, f.ptype ";
+
+$reportQuery .= " FROM ".$table_finance." f ";
+
+$reportQuery .= " WHERE 1=1 ";
+$reportQuery .= " GROUP BY f.aid,f.ptype ";
+
 
 if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['date-range'] != '' || $_GET['agent-id'] != '')) {
 
     if (!empty($_GET['front-agent']) && $_GET['front-agent'] != 'all') {
-        $font_agent = $wpdb->get_row('SELECT * FROM ' . $table_name . ' WHERE aid="' . esc_sql($_GET['front-agent']) . '"');
+        $font_agent = $wpdb->get_row('SELECT * FROM ' . $table_alliance . ' WHERE aid="' . esc_sql($_GET['front-agent']) . '"');
         $agents = ff_get_chield_agents($font_agent);
 
         $applied_filter['front-agent'] = $font_agent->user_name;
     } else if (!empty($_GET['agent-id'])) {
-        $agents = $wpdb->get_results('SELECT * FROM ' . $table_name . ' WHERE aid="' . esc_sql($_GET['agent-id']) . '"');
+        $agents = $wpdb->get_results('SELECT * FROM ' . $table_alliance . ' WHERE aid="' . esc_sql($_GET['agent-id']) . '"');
         $applied_filter['agent-id'] = $_GET['agent-id'];
     } else {
-        $agents = $wpdb->get_results('SELECT * FROM ' . $table_name . ' ORDER BY ID ASC');
+        $agents = $wpdb->get_results('SELECT * FROM ' . $table_alliance . ' ORDER BY ID ASC');
     }
 } else {
 
-    $agents = $wpdb->get_results('SELECT * FROM ' . $table_name . ' ORDER BY ID ASC');
-}
+    $payments = $wpdb->get_results($reportQuery);
+} 
+
 ?>
 <div class="row">
     <div class="col-sm-12">
@@ -73,8 +83,8 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
                         <div class="col-2">
                             <input name="agent-id" value="<?php echo @$_GET['agent-id'] ?>" class="form-control" placeholder="agent id"/>
                         </div>
-
-                        <div class="col-2 d-none">
+                        
+                        <div class="col-2">
 
                             <div class="input-group">
                                 <div class="input-group-prepend">
@@ -113,95 +123,54 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
         </div>
     <?php endif; ?>
     <div class="col-sm-12">
-        <form action="#" method="post" id="finance-dispatch">
+        <div class="card card-info">
+            <div class="card-body">
+                <table id="fincance-report-table" class="table table-bordered table-striped">
+                    <thead>
+                       
+                        <tr>
+                            <th style="width: 10px">#</th>
+                            <th style="width: 20px">CID</th>
+                            <th style="width: 20px">BC</th>
 
-            <div class="card card-info">
-                <div class="card-body">
-                    <div class="navbar navbar-expand navbar-info navbar-dark mb-2">
-                        <img class="spin-img d-none" src="<?php echo get_admin_url() ?>images/wpspin_light.gif" />
-                        <div class="navbar-nav ml-auto">
-                            <select name="payment-type" class="form-control">
-                                <option value="0">Select Payment Type</option>
-                                <option value="Cheque">Cheque</option>
-                                <option value="Cash">Cash</option>
-                            </select>
-                            <button class="btn btn-warning  submit-finance-dispatch ml-4" type="submit">Dispatch</button>
-                        </div>
-                    </div>
-                    <table id="fincance-report-table" class="table table-bordered table-striped">
-                        <thead>
-
-                            <tr>
-                                <th style="width: 10px"><input data-terget="dispatch-aid" type="checkbox" value="select-all" name="select-all" id="select-all" />
-                                </th>
-                                <th style="width: 10px">#</th>
-                                <th style="width: 20px">CID</th>
-                                <th style="width: 20px">BC</th>
-
-                                <th style="width: 200px">Name</th>
-                                <th style="width: 15px">Left</th>
-                                <th style="width: 15px">Right</th>
-                                <th style="width: 30px">Level</th>
-                                <th style="width: 30px">Amount</th>
-                                <th style="width: 30px">Total</th>
-                                <th style="width: 40px">Registered</th>
-                                <th style="width: 40px">Cheque/Cash</th>
-                                <th style="width: 40px">Signature/Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            if (!empty($agents)):
-                                $index = 1;
-                                foreach ($agents as $agent) {
-                                    $level = ff_get_agaent_level($agent);
-
-                                    $level_amount = [];
-                                    $level_amount_total = 0;
-
-                                    if (!empty($_GET['level']) && $_GET['level'] != 'all' && $level['level'] !== $_GET['level']) {
-                                        continue;
-                                    }
-                                    if ($level['level'] === 0) {
-                                        continue;
-                                    }
-                                    $flevel = ff_financial_level($agent);
-                                    if (!empty($flevel)) {
-                                        foreach ($flevel as $l) {
-                                            $level_amount[] = $l['amount'];
-                                            $level_amount_total += $l['amount'];
-                                        }
-                                    }
-                                    $html = '<tr class="data-row data-dispactch" data-aid="' . $agent->aid . '" >';
-                                    $html .= '<td for="checkme-'.$agent->aid.'"><div class="form-check"><input class="form-check-input dispatch-aid" type="checkbox" value="' . $agent->aid . '" name="dispatch[' . $index . ']" id="checkme-' . $agent->aid . '" /></div></td>';
-                                    $html .= '<td>' . $index . '</td>';
-                                    $html .= '<td>' . $agent->aid . '</td>';
-                                    $html .= '<td>' . $agent->business_center . '</td>';
-                                    $html .= '<td>' . $agent->user_name . '</td>';
-                                    $html .= '<td>' . $agent->left_node_count . '</td>';
-                                    $html .= '<td>' . $agent->right_node_count . '</td>';
-                                    $html .= '<td>' . $level['level'] . '</td>';
-                                    $html .= '<td>' .implode(', ',$level_amount) . '</td>';
-                                    $html .= '<td>' . $level_amount_total . '</td>';
-                                    $html .= '<td>' . date("d/m/Y", $agent->created_at) . '</td>';
-                                    $html .= '<td class="ptype">&nbsp;</td>';
-                                    $html .= '<td>&nbsp;</td>';
-
-                                    $html .= '</tr>';
-                                    $index++;
-                                    echo $html;
-                                }
-                            endif;
-                            ?>
-                        </tbody>
-                    </table>
-                </div>
+                            <th style="width: 200px">Name</th>
+                            <th style="width: 200px">Levelt</th>
+                            <th style="width: 30px">Amounts</th>
+                            <th style="width: 30px">Total</th>
+                            <th style="width: 40px">Cheque/Cash</th>
+                            <th style="width: 40px">Signature</th>
+                             <th style="width: 40px">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        if (!empty($payments)):
+                            $index = 1;
+                            foreach ($payments as $payment) {
+                               $agent = $wpdb->get_row("SELECT * FROM " . $table_alliance . " WHERE aid='".$payment->aid."'");
+                                
+                                $html = '<tr>';
+                                $html .= '<td>' . $index . '</td>';
+                                $html .= '<td>' . $payment->aid . '</td>';
+                                $html .= '<td>' . $agent->business_center . '</td>';
+                                $html .= '<td>' . $agent->user_name . '</td>';
+                                $html .= '<td>' . $payment->levels . '</td>';
+                                $html .= '<td>' . $payment->amounts . '</td>';
+                                $html .= '<td>' . $payment->total . '</td>';
+                              
+                                $html .= '<td>' . $payment->ptype . '</td>';
+                                $html .= '<td>&nbsp;</td>';
+                                $html .= '<td>' . date("d/m/Y", $agent->created_at) . '</td>';
+                                $html .= '</tr>';
+                                $index++;
+                                echo $html;
+                            }
+                        endif;
+                        ?>
+                    </tbody>
+                </table>
             </div>
-            <?php wp_nonce_field('addnew_agent'); ?>
-            <input type="hidden" name="action" value="finance_dispatch" />
-
-        </form>
+        </div>
     </div>
 
 </div>
-

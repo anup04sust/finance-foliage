@@ -10,7 +10,7 @@ namespace FinanceFoliage;
 class Agents {
 
     public $settings;
-    public $tableName;
+    public $tableAlince;
 
     public function __construct() {
         $this->settings = get_option('finance_foliage_settings');
@@ -23,7 +23,7 @@ class Agents {
 
         global $wpdb;
 
-        $this->tableName = $wpdb->prefix . 'alliance';
+        $this->tableAlince = $wpdb->prefix . 'alliance';
     }
 
     public function addNew() {
@@ -47,7 +47,8 @@ class Agents {
         $user_data['created_at'] = strtotime($created_at);
         $user_data['slno'] = trim($sl_no);
         ff_filelog('addNew', serialize($user_data));
-        $create_user = $this->addWpUser($user_data);
+        //$create_user = $this->addWpUser($user_data);
+        $create_user = $this->addAgent($user_data);
         if ($create_user['status']) {
             echo wp_json_encode(['message' => 'success', 'status' => 200, 'msg' => $create_user['msg']]);
         } else {
@@ -89,6 +90,39 @@ class Agents {
         wp_die();
     }
 
+    private function addAgent($user_data) {
+        global $wpdb;
+        $ref = $wpdb->get_row("SELECT aid FROM " . $this->tableAlince . " WHERE aid='" . $user_data['slno'] . "'");
+        if (empty($ref)) {
+            $alliance_id = $wpdb->insert($this->tableAlince, array(
+                'user_id' => 0,
+                'aid' => $user_data['slno'],
+                'user_name' => $user_data['display_name'],
+                'created_at' => $user_data['created_at'],
+                'parent_node' => $user_data['referral'],
+                'spos' => !empty($user_data['referral']) ? $user_data['wing'] : '0',
+            ));
+            ff_filelog('addAgent new ', $user_data['slno']);
+        } else {
+            $alliance_id = $wpdb->update($this->tableAlince, array(
+                'user_id' => 0,
+                'aid' => $user_data['slno'],
+                'user_name' => $user_data['display_name'],
+                'created_at' => $user_data['created_at'],
+                'parent_node' => $user_data['referral'],
+                'spos' => !empty($user_data['referral']) ? $user_data['wing'] : '0',
+                    ), array('aid' => $user_data['slno']));
+            ff_filelog('addAgent Update ', $user_data['slno']);
+        }
+        if (!empty($user_data['referral']) && !empty($user_data['wing'])) {
+            $response = $this->updateReferral($user_data['referral'], $user_data['wing'], $user_data['slno']);
+            ff_filelog('addNew updateReferral', $response);
+            return array('status' => true, 'msg' => 'Agent added at level:' . $response);
+        } else {
+            return array('status' => true, 'msg' => 'Agent added successfully');
+        }
+    }
+
     private function addWpUser($user_data) {
 
         $user_id = username_exists($user_data['user_login']);
@@ -114,9 +148,9 @@ class Agents {
             );
             ff_filelog('addNew', 'WP User ID ' . $user_id);
             global $wpdb;
-            $ref = $wpdb->get_row("SELECT aid FROM " . $this->tableName . " WHERE aid='" . $user_data['slno'] . "'");
+            $ref = $wpdb->get_row("SELECT aid FROM " . $this->tableAlince . " WHERE aid='" . $user_data['slno'] . "'");
             if (empty($ref)) {
-                $alliance_id = $wpdb->insert($this->tableName, array(
+                $alliance_id = $wpdb->insert($this->tableAlince, array(
                     'user_id' => $user_id,
                     'aid' => $user_data['slno'],
                     'user_name' => $user_data['display_name'],
@@ -126,7 +160,7 @@ class Agents {
                 ));
                 ff_filelog('addNew ', $user_data['slno']);
             } else {
-                $alliance_id = $wpdb->update($this->tableName, array(
+                $alliance_id = $wpdb->update($this->tableAlince, array(
                     'user_id' => $user_id,
                     'aid' => $user_data['slno'],
                     'user_name' => $user_data['display_name'],
@@ -167,7 +201,7 @@ class Agents {
             global $wpdb;
 
             $alliance_id = $wpdb->update(
-                    $this->tableName,
+                    $this->tableAlince,
                     array(
                         'user_id' => $user_id,
                         'aid' => $user_data['slno'],
@@ -194,9 +228,9 @@ class Agents {
 
     private function updateReferral($referral, $wing, $alliance_id) {
         global $wpdb;
-        $ref = $wpdb->get_row("SELECT aid FROM " . $this->tableName . " WHERE aid='" . $referral . "'");
+        $ref = $wpdb->get_row("SELECT aid FROM " . $this->tableAlince . " WHERE aid='" . $referral . "'");
         if (empty($ref)) {
-            $referral_id = $wpdb->insert($this->tableName, array(
+            $referral_id = $wpdb->insert($this->tableAlince, array(
                 'user_id' => '0',
                 'aid' => $referral,
                 'user_name' => 'Unknown',
@@ -205,17 +239,21 @@ class Agents {
             ));
         }
         if ($wing === 'L') {
-            $alliance_id = $wpdb->update($this->tableName, array(
+            $alliance_id = $wpdb->update($this->tableAlince, array(
                 'left_node' => $alliance_id), array('aid' => $referral));
             ff_filelog('addNew updateReferral L', $referral . '-' . $alliance_id);
         }
         if ($wing === 'R') {
-            $alliance_id = $wpdb->update($this->tableName, array(
+            $alliance_id = $wpdb->update($this->tableAlince, array(
                 'right_node' => $alliance_id), array('aid' => $referral));
             ff_filelog('addNew updateReferral R', $referral . '-' . $alliance_id);
         }
-        $level_count = $this->updateNodeCount($referral, $wing);
+        $level_count = $this->updateNodeCount($referral, $wing, $alliance_id);
+        $wpdb->update($this->tableAlince, array(
+                'update_status' => 1), array('aid' => $alliance_id));
         ff_filelog('addNew updateNodeCount', $level_count);
+        //ff_filelog('addNew updateNodeCount2', serialize($level_count));
+        
         return $level_count;
     }
 
@@ -227,15 +265,15 @@ class Agents {
 
         global $wpdb;
         if (!empty($referral) && $wing === 'L') {
-            $wpdb->query("UPDATE " . $this->tableName . " SET left_node_count =  left_node_count + 1  WHERE aid='" . $referral . "'");
+            $wpdb->query("UPDATE " . $this->tableAlince . " SET left_node_count =  left_node_count + 1, all_node_count_left =  all_node_count_left + 1  WHERE aid='" . $referral . "'");
             ff_filelog('addNew updateNodeCount L', $referral);
         }
         if (!empty($referral) && $wing === 'R') {
-            $wpdb->query("UPDATE " . $this->tableName . " SET right_node_count = right_node_count + 1  WHERE aid='" . $referral . "'");
+            $wpdb->query("UPDATE " . $this->tableAlince . " SET right_node_count = right_node_count + 1, all_node_count_right =  all_node_count_right + 1  WHERE aid='" . $referral . "'");
             ff_filelog('addNew updateNodeCount R', $referral);
         }
 
-        $node_referral = $wpdb->get_row("SELECT parent_node,spos FROM " . $this->tableName . " WHERE  aid='" . $referral . "'");
+        $node_referral = $wpdb->get_row("SELECT parent_node,spos FROM " . $this->tableAlince . " WHERE  aid='" . $referral . "'");
 
         if (!empty($node_referral)) {
             $level = $this->updateNodeCount($node_referral->parent_node, $node_referral->spos, $level++);
@@ -248,17 +286,17 @@ class Agents {
         if (empty($referral)) {
             return $level;
         }
-        ff_filelog('updateSyncCount:', $referral.'-'.$wing.'-'.$aid);
+        ff_filelog('updateSyncCount:', $referral . '-' . $wing . '-' . $aid);
         global $wpdb;
         $update = $update_l = $update_r = 0;
         if (!empty($referral) && $wing === 'L') {
-            $update_l = $wpdb->query("UPDATE " . $this->tableName . " SET all_node_count_left =  all_node_count_left + 1  WHERE aid='" . $referral . "'");
+            $update_l = $wpdb->query("UPDATE " . $this->tableAlince . " SET all_node_count_left =  all_node_count_left + 1  WHERE aid='" . $referral . "'");
         } elseif (!empty($referral) && $wing === 'R') {
-            $update_r = $wpdb->query("UPDATE " . $this->tableName . " SET all_node_count_right = all_node_count_right + 1  WHERE aid='" . $referral . "'");
+            $update_r = $wpdb->query("UPDATE " . $this->tableAlince . " SET all_node_count_right = all_node_count_right + 1  WHERE aid='" . $referral . "'");
         }
 
-        $node_referral = $wpdb->get_row("SELECT aid,parent_node,spos FROM " . $this->tableName . " WHERE  aid='" . $referral . "'");
-        ff_filelog('updateSyncCount:', $aid . '-L:' . $update_l.'-R:'.$update_r);
+        $node_referral = $wpdb->get_row("SELECT aid,parent_node,spos FROM " . $this->tableAlince . " WHERE  aid='" . $referral . "'");
+        ff_filelog('updateSyncCount:', $aid . '-L:' . $update_l . '-R:' . $update_r);
         if ($wpdb->last_error != '') {
             ff_filelog('updateSyncCount:', ' wpdb error-' . $wpdb->last_error);
         }
@@ -275,7 +313,7 @@ class Agents {
     public function verifyReferral() {
         $referral_id = $_POST['referral_id'];
         global $wpdb;
-        $referral_data = $wpdb->get_row("SELECT left_node,right_node FROM " . $this->tableName . " WHERE  aid='" . $referral_id . "'");
+        $referral_data = $wpdb->get_row("SELECT left_node,right_node FROM " . $this->tableAlince . " WHERE  aid='" . $referral_id . "'");
         if (!empty($referral_data)) {
             echo wp_json_encode(
                     array(
@@ -301,7 +339,7 @@ class Agents {
             return false;
         }
         global $wpdb;
-        $referral_data = $wpdb->get_row("SELECT left_node,right_node FROM " . $this->tableName . " WHERE  aid='" . $user_data['referral'] . "'");
+        $referral_data = $wpdb->get_row("SELECT left_node,right_node FROM " . $this->tableAlince . " WHERE  aid='" . $user_data['referral'] . "'");
         if ($user_data['wing'] === 'L' && !empty($referral_data->left_node)) {
             return true;
         }
@@ -373,20 +411,20 @@ class Agents {
             global $wpdb;
             $sync_reset = esc_attr(@$_POST['resetall']);
             if (!empty($sync_reset)) {
-                $updated = $wpdb->query("UPDATE " . $this->tableName . " SET all_node_count_left = '0',all_node_count_right = '0'");
-                $updated = $wpdb->query("UPDATE " . $this->tableName . " SET update_status = '0'");
+                $updated = $wpdb->query("UPDATE " . $this->tableAlince . " SET all_node_count_left = '0',all_node_count_right = '0'");
+                $updated = $wpdb->query("UPDATE " . $this->tableAlince . " SET update_status = '0'");
             }
-            $nodes = $wpdb->get_results("SELECT aid,parent_node,spos FROM " . $this->tableName . " WHERE update_status='0' LIMIT 0,20");
+            $nodes = $wpdb->get_results("SELECT aid,parent_node,spos FROM " . $this->tableAlince . " WHERE update_status='0' LIMIT 0,20");
 
             $nodeLevel = 0;
             if (!empty($nodes)) {
                 foreach ($nodes as $key => $node) {
-                    ff_filelog('-syncAgents-:', $node->aid,'-'.$key);
+                    ff_filelog('-syncAgents-:', $node->aid, '-' . $key);
                     $nodeLevel = $this->updateSyncCount($node->parent_node, $node->spos, $node->aid);
-                    $update = $wpdb->query("UPDATE " . $this->tableName . " SET update_status = '1'  WHERE aid='" . $node->aid . "'");
+                    $update = $wpdb->query("UPDATE " . $this->tableAlince . " SET update_status = '1'  WHERE aid='" . $node->aid . "'");
                 }
             }
-             ff_filelog('-syncAgents-:', sprintf('Total node update %s', $nodeLevel));
+            ff_filelog('-syncAgents-:', sprintf('Total node update %s', $nodeLevel));
             $response = [
                 'status' => 200,
                 'msg' => sprintf('Total node update %s', $nodeLevel),
@@ -425,7 +463,7 @@ class Agents {
     private function resetAgentsLevel($sdate) {
         global $wpdb;
 
-        $updated = $wpdb->query('UPDATE ' . $this->tableName . ' SET right_node_count = \'0\',left_node_count = \'0\'');
+        $updated = $wpdb->query('UPDATE ' . $this->tableAlince . ' SET right_node_count = \'0\',left_node_count = \'0\'');
         $settings = get_option('finance_foliage_settings');
         $settings['last_sync_date'] = strtotime('now');
         $settings['sync_date'] = strtotime($sdate);
@@ -435,7 +473,7 @@ class Agents {
     private function syncNodeCount($sdate, $edate) {
 
         global $wpdb;
-        $nodes = $wpdb->get_results('SELECT * FROM ' . $this->tableName . ' WHERE created_at >=' . $sdate . ' AND created_at <=' . $edate);
+        $nodes = $wpdb->get_results('SELECT * FROM ' . $this->tableAlince . ' WHERE created_at >=' . $sdate . ' AND created_at <=' . $edate);
         $nodeCount = array();
         foreach ($nodes as $key => $node) {
             $nodeCount[$key] = $this->updateNodeCount($node->parent_node, $node->spos);
@@ -494,7 +532,7 @@ class Agents {
                 'msg' => count($parents) . ' Referral agents found',
             );
             foreach ($parents as $ref => $node) {
-                $agent = $wpdb->get_row('SELECT aid FROM ' . $this->tableName . ' WHERE aid ="' . $ref . '"');
+                $agent = $wpdb->get_row('SELECT aid FROM ' . $this->tableAlince . ' WHERE aid ="' . $ref . '"');
                 if (!array_key_exists($ref, $agentsRow) && empty($agent)) {
                     $hasError = true;
                     $report[] = array(
@@ -521,7 +559,7 @@ class Agents {
 
         foreach ($agentsRow as $aid => $node) {
 
-            $agent = $wpdb->get_row('SELECT aid FROM ' . $this->tableName . ' WHERE aid ="' . $aid . '"');
+            $agent = $wpdb->get_row('SELECT aid FROM ' . $this->tableAlince . ' WHERE aid ="' . $aid . '"');
             if (!empty($agent)) {
                 $hasError = true;
                 $report[] = array(
