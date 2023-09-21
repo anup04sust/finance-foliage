@@ -74,15 +74,7 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
                             <input name="agent-id" value="<?php echo @$_GET['agent-id'] ?>" class="form-control" placeholder="agent id"/>
                         </div>
 
-                        <div class="col-2 d-none">
-
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
-                                </div>
-                                <input data-sdate="<?php echo date('Y/m/d', $bill_sdate); ?>" data-edate="<?php echo date('Y/m/d', $bill_edate); ?>" type="text" class="form-control float-right" id="date-range" name="date-range">
-                            </div>
-                        </div>
+                        
                         <div class="col-2">
                             <button type="submit" class="btn btn-info">Apply Filter</button>
                             <input type="reset" class="btn btn-secondary" />
@@ -122,8 +114,8 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
 
                         <div class="navbar-nav ml-auto">
                             <div class="input-group date mr-4" id="payment_created_at" data-target-input="nearest" style="width:350px">
-                                <input required type="text" name="created_at" class="form-control datetimepicker-input" data-target="#created_at" id="created_at" value="<?php echo date('Y-m-d') ?>"/>
-                                <div class="input-group-append" data-target="#created_at" data-toggle="datetimepicker">
+                                <input required type="text" name="payment_date" class="form-control" data-toggle="datetimepicker" data-target="#payment_created_at" id="payment_date" value="<?php echo date('Y-m-d') ?>"/>
+                                <div class="input-group-append" data-target="#payment_created_at" data-toggle="datetimepicker">
                                     <div class="input-group-text"><i class="fa fa-calendar"></i></div>
                                 </div>
                             </div>
@@ -159,10 +151,11 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
                         <tbody>
                             <?php
                             if (!empty($agents)):
+                               
                                 $index = 1;
                                 foreach ($agents as $agent) {
                                     $level = ff_get_agaent_level($agent);
-
+                                   
                                     $level_amount = array();
                                     $level_amount_total = 0;
 

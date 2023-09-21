@@ -78,7 +78,7 @@
 //                options: barChartOptions
 //            });
 //        }
-        if ($('#fincance-report-table').length>0) {
+        if ($('#fincance-report-table').length > 0) {
 
             $("#fincance-report-table").DataTable({
                 responsive: true,
@@ -86,11 +86,10 @@
                 autoWidth: false,
                 pageLength: 50,
                 buttons: ["excel", "print", 'pdf'],
-               
-               
+
             }).buttons().container().appendTo('#fincance-report-table_wrapper .col-md-6:eq(0)');
         }
-        if ($('form#finance-dispatch').length>0) {
+        if ($('form#finance-dispatch').length > 0) {
             $('form#finance-dispatch').on('submit', function (e) {
                 e.preventDefault();
                 var loader = $(this).find('.spin-img');
@@ -140,7 +139,9 @@
                     $(this).parents('.data-dispactch').removeClass('bg-purple');
                 }
             });
-
+            $('#payment_created_at').datetimepicker({
+                format: 'YYYY-MM-DD'
+            });
         }
 
         if ($('.select2bs4').length > 0) {

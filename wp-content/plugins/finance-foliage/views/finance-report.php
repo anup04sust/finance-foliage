@@ -134,7 +134,7 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
                             <th style="width: 20px">BC</th>
 
                             <th style="width: 200px">Name</th>
-                            <th style="width: 200px">Levelt</th>
+                            <th style="width: 200px">Level</th>
                             <th style="width: 30px">Amounts</th>
                             <th style="width: 30px">Total</th>
                             <th style="width: 40px">Cheque/Cash</th>
