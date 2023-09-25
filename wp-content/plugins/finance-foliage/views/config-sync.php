@@ -55,10 +55,10 @@ $time_flug = ($bill['bill_type'] == 'daily') ? 86400 : (($bill['bill_type'] == '
 
             $persent = get_sync_new_progress();
             ?>
-            <form id="all-agent-sync" class="agent-sync-form" method="post">
+            <form id="all-agent-sync-current" class="agent-sync-form" method="post">
                 <div class="card-body">
                     <div class="mb-4">
-                        <label class="form-check-label" id="sync-progress-label"> <?php echo sprintf('Progress %s', $persent);?>%</label>
+                        <label class="form-check-label sync-progress-label" > <?php echo sprintf('Progress %s', $persent);?>%</label>
                         <div class="progress">
                             <div class="progress-bar" style="width: <?php echo $persent;?>%"></div>
                         </div>
@@ -102,19 +102,19 @@ $time_flug = ($bill['bill_type'] == 'daily') ? 86400 : (($bill['bill_type'] == '
             <form id="all-agent-sync" class="agent-sync-form" method="post">
                 <div class="card-body">
                     <div class="mb-4">
-                        <label class="form-check-label" id="sync-progress-label"> <?php echo sprintf('Progress %s', $persent);?>%</label>
+                        <label class="form-check-label sync-progress-label"> <?php echo sprintf('Progress %s', $persent);?>%</label>
                         <div class="progress">
                             <div class="progress-bar" style="width: <?php echo $persent;?>%"></div>
                         </div>
                     </div>
                     <div class="form-check">
-                        <input type="checkbox" name="resetall" id="sync-resetall" value="1" class="form-check-input">
-                        <label class="form-check-label" for="sync-resetall">Reset previous count</label>
+                        <input type="checkbox" name="resetall" id="sync-resetall-1" value="1" class="form-check-input">
+                        <label class="form-check-label" for="sync-resetall-1">Reset previous count</label>
                     </div>
 
                     <div class="form-check">
-                        <input type="checkbox" name="know-sync-custom" class="form-check-input" id="know-sync-custom-all" required>
-                        <label class="form-check-label" for="know-sync-custom-all">I know whats happend after synchronization agents status</label>
+                        <input type="checkbox" name="know-sync-custom" class="form-check-input" id="know-sync-custom-all-1" required>
+                        <label class="form-check-label" for="know-sync-custom-all-1">I know whats happend after synchronization agents status</label>
                     </div>
                 </div>
                 <!-- /.card-body -->

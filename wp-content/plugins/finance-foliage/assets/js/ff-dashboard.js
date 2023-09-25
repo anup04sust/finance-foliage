@@ -526,11 +526,12 @@
 
                 return false;
             });
-            $('#all-agent-sync').on('submit', function (e) {
+            $('#all-agent-sync, #all-agent-sync-current').on('submit', function (e) {
                 $('#message-wrap').text('');
-                var formData = $(this).serialize();
-                var _btn = $(this).find('.btn');
-                var _loader = $(this).find('.spin-img');
+                var syncForm = $(this);
+                var formData = syncForm.serialize();
+                var _btn = syncForm.find('.btn');
+                var _loader = syncForm.find('.spin-img');
                 _loader.removeClass('d-none');
                 _btn.prop('disabled', true);
                 $.ajax({
@@ -544,8 +545,8 @@
                         if (res.status === 200) {
                             _loader.addClass('d-none');
                             _btn.prop('disabled', false);
-                            $('#all-agent-sync .progress-bar').width(res.progress + '%');
-                            $('#sync-progress-label').text('Progress ' + res.progress + '%');
+                            syncForm.find('.progress-bar').width(res.progress + '%');
+                            syncForm.find('.sync-progress-label').text('Progress ' + res.progress + '%');
                         } else {
                             location.reload();
                         }

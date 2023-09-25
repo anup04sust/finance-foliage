@@ -1,7 +1,5 @@
 <?php
 
-// set the default timezone to use.
-date_default_timezone_set('ASIA/DHAKA');
 /*
  * Here comes the text of your license
  * Each line should be prefixed with  * 
@@ -103,13 +101,13 @@ function ff_financial_level($agent_info) {
         $left = 0;
         $right = 0;
         $paid_level = $wpdb->get_row('SELECT active_level FROM ' . $wpdb->prefix . 'alliance' . ' WHERE aid="' . $agent_info->aid . '"');
-       
+
         foreach ($finance_levels as $settings) {
             $left += $settings['left_node'];
             $right += $settings['right_node'];
-           
-            if ($agent_info->left_node_count >= $settings['left_node'] && $agent_info->right_node_count >= $settings['right_node'] && $settings['level'] > $paid_level->active_level) {
-               
+
+            if ($agent_info->left_node_count >= $left && $agent_info->right_node_count >= $right && $settings['level'] > $paid_level->active_level) {
+
                 $response[$settings['level']] = array(
                     'level' => $settings['level'],
                     'amount' => $settings['level_amount'],
@@ -119,7 +117,7 @@ function ff_financial_level($agent_info) {
             }
         }
     }
-    
+
     return $response;
 }
 
@@ -398,6 +396,7 @@ function get_sync_progress() {
     $persent = (($sync_count + $none_sync_status) > 0) ? (($sync_count * 100) / ($sync_count + $none_sync_status)) : 0;
     return ceil($persent);
 }
+
 function get_sync_new_progress() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'alliance';

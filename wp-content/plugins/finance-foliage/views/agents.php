@@ -31,9 +31,12 @@ $agentnode_edit_url = get_permalink($foliage_settings['agentnode_edit_page_id'])
 
                             <th style="width: 200px">Name</th>
                             <th style="width: 15px">Left</th>
+                            <th style="width: 15px">Total Left</th>
                             <th style="width: 15px">Right</th>
+                            <th style="width: 15px">Total Right</th>
+                            <th style="width: 15px">Level</th>
+                            <th style="width: 15px">Circle</th>
                             <th style="width: 30px">Registered</th>
-                            <th style="width: 30px">Updated</th>
                             <th style="width: 40px">-</th>
                         </tr>
                     </thead>
@@ -51,10 +54,14 @@ $agentnode_edit_url = get_permalink($foliage_settings['agentnode_edit_page_id'])
                                     <td><?php echo $key + 1; ?></td>
                                     <td><?php echo $agent->aid; ?></td>
                                     <td><?php echo $agent->user_name; ?></td>
-                                    <td><?php echo $agent->left_node_count . '/' . $agent->all_node_count_left; ?></td>
-                                    <td><?php echo $agent->right_node_count . '/' . $agent->all_node_count_right; ?></td>
+                                    <td><?php echo $agent->left_node_count ; ?></td>
+                                    <td><?php echo $agent->all_node_count_left; ?></td>
+                                    <td><?php echo $agent->right_node_count; ?></td>
+                                    <td><?php echo $agent->all_node_count_right; ?></td>
+                                    <td><?php echo $agent->active_level; ?></td>
+                                    <td><?php echo $agent->active_circle; ?></td>
                                     <td><?php echo date("D jS, M Y", $agent->created_at); ?></td>
-                                    <td><?php echo date("D jS, M Y H:i:s", strtotime($agent->updated)); ?></td>
+                                   
 
                                     <td>
                                         <a href="<?php echo $agentnode_edit_url . '?view=edit&node=' . $agent->ID; ?>" class="btn btn-sm" title="Edit">

@@ -37,6 +37,7 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
 
     $agents = $wpdb->get_results('SELECT * FROM ' . $table_alliance . ' WHERE left_node_count > 0 AND right_node_count > 0 ORDER BY ID ASC');
 }
+
 ?>
 <div class="row">
     <div class="col-sm-12">
@@ -158,6 +159,7 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
                                    
                                     $level_amount = array();
                                     $level_amount_total = 0;
+                                    $level_size = array();
 
                                     if (!empty($_GET['level']) && $_GET['level'] != 'all' && $level['level'] !== $_GET['level']) {
                                         continue;
@@ -170,6 +172,7 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
                                         foreach ($flevel as $l) {
                                             $level_amount[] = $l['amount'];
                                             $level_amount_total += $l['amount'];
+                                            $level_size[] = $l['level'];
                                         }
                                     }
 
@@ -182,7 +185,7 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
                                     $html .= '<td>' . $agent->user_name . '</td>';
                                     $html .= '<td>' . $agent->left_node_count . '/' . $agent->all_node_count_left . '</td>';
                                     $html .= '<td>' . $agent->right_node_count . '/' . $agent->all_node_count_right . '</td>';
-                                    $html .= '<td>' . $level['level'] . '</td>';
+                                    $html .= '<td>' . implode(', ', $level_size) . '</td>';
                                     $html .= '<td>' . implode(', ', $level_amount) . '</td>';
                                     $html .= '<td>' . $level_amount_total . '</td>';
                                     $html .= '<td>' . date("d/m/Y", $agent->created_at) . '</td>';

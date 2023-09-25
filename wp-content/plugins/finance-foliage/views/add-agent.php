@@ -207,6 +207,10 @@ $agentnode_edit_url = get_permalink($foliage_settings['agentnode_addnew_page_id'
                                     <i class="fas fa-user-plus mr-2"></i> Add new agent
                                 </a>
                                 |
+                                <a href="<?php echo $agentnode_edit_url; ?>?import=csv"  class="btn btn-tool" >
+                                    <i class="fas fa-file-upload mr-2 ml-2"></i> Import File
+                                </a>
+                                |
                                 <a href="<?php echo FINANCE_FOLIGE_DIR_URL ?>/sample-csv.csv" target="_blank" class="btn btn-tool  btn-secondary ><i class="fa-solid fa-file-arrow-down mr-2"></i> Sample</a>
                             </div>
                         </div>

@@ -22,7 +22,7 @@
                     </li>
                     <?php
                     if (function_exists('ff_get_bill_duration')) {
-                        $bill = ff_get_bill_duration();
+                        $bill = ff_get_bill_duration('now');
                         switch ($bill['bill_type']) {
                             case 'daily':
                                 echo sprintf('<li><span class="nav-link">%s : %s</span></li>', strtoupper($bill['bill_type']), date("D jS, M Y", $bill['bill_date']));

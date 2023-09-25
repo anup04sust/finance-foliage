@@ -27,7 +27,7 @@ class Finance {
         global $wpdb;
         $payment_type = (@$_POST['payment-type']) ? esc_attr($_POST['payment-type']) : 0;
         $dispatch_aids = (@$_POST['dispatch']) ? $_POST['dispatch'] : array();
-        $payment_date= (@$_POST['payment_date']) ? strtotime($_POST['payment_date']) : strtotime('now');
+        $payment_date = (@$_POST['payment_date']) ? strtotime($_POST['payment_date']) : strtotime('now');
 
         if (empty($payment_type)) {
             echo wp_json_encode(array('status' => '201', 'msg' => 'Please select a payment mathod'));
@@ -41,7 +41,7 @@ class Finance {
         foreach ($dispatch_aids as $aid) {
             $agent_info = $wpdb->get_row("SELECT * FROM " . $this->tableAlince . " WHERE aid='" . $aid . "'");
             //pprint($agent_info);
-            $payment = $this->addPayment($agent_info,$payment_type,$payment_date);
+            $payment = $this->addPayment($agent_info, $payment_type, $payment_date);
             $resData[] = [
                 'aid' => $aid,
                 'ptype' => $payment_type,
@@ -52,7 +52,7 @@ class Finance {
         wp_die();
     }
 
-    private function addPayment($agent, $ptype,$payment_date) {
+    private function addPayment($agent, $ptype, $payment_date) {
         global $wpdb;
         $financial_level = ff_financial_level($agent);
         if (!empty($financial_level)) {
@@ -63,31 +63,47 @@ class Finance {
                 $node_payment_lcount += $aflevel['left'];
                 $node_payment_rcount += $aflevel['right'];
                 $paymentData = array(
-                            'aid' => $agent->aid,
-                            'level' => $aflevel['level'],
-                            'left_n' => $aflevel['left'],
-                            'right_n' => $aflevel['right'],
-                            'amount' => $aflevel['amount'],
-                            'ptype' => $ptype,
-                            'created_at' => $payment_date,
-                        );
-                $higher_Level=$aflevel['level'];
-                $wpdb->insert($this->tableFinance,$paymentData);
+                    'aid' => $agent->aid,
+                    'level' => $aflevel['level'],
+                    'left_n' => $aflevel['left'],
+                    'right_n' => $aflevel['right'],
+                    'amount' => $aflevel['amount'],
+                    'ptype' => $ptype,
+                    'created_at' => $payment_date,
+                );
+                $higher_Level = ($higher_Level < $aflevel['level']) ? $aflevel['level'] : $higher_Level;
+                $wpdb->insert($this->tableFinance, $paymentData);
                 $last_inserted_id = $wpdb->insert_id;
-                ff_filelog('addPayment', $last_inserted_id.':'. serialize($paymentData));
-                ff_filelog('addPayment', 'Total Left:'. $node_payment_lcount);
-                ff_filelog('addPayment', 'Total Right:'. $node_payment_rcount);
-                
+                ff_filelog('addPayment', $last_inserted_id . ':' . serialize($paymentData));
+                ff_filelog('addPayment', 'Total Left:' . $node_payment_lcount);
+                ff_filelog('addPayment', 'Total Right:' . $node_payment_rcount);
             }
-            if(($node_payment_lcount+$node_payment_rcount)>0){
-               $updateSql = "UPDATE " . $this->tableAlince;
-               $updateSql .= " SET left_node_count =  left_node_count - ".$node_payment_lcount;
-               $updateSql .=",right_node_count=right_node_count - ".$node_payment_rcount;
-               $updateSql .=",active_level= ".$higher_Level;
-               $updateSql .="  WHERE aid='" . $agent->aid . "'";
-               $update_l = $wpdb->query($updateSql); 
-             ff_filelog('addPayment', 'UPDATEQuery:'. $updateSql);
-             
+            if (($node_payment_lcount + $node_payment_rcount) > 0) {
+                $updateSql = "UPDATE " . $this->tableAlince;
+
+                if ($higher_Level == 4) {
+                    $updateSql .= " SET left_node_count =  0";
+                    $updateSql .= ",right_node_count= 0";
+                    $updateSql .= ",active_level= 0";
+                    $updateSql .= ",active_circle=active_circle +1";
+                    $paymentCData = array(
+                        'aid' => $agent->aid,
+                        'level' => 0,
+                        'left_n' => $agent->left_node_count - $node_payment_lcount,
+                        'right_n' => $agent->right_node_count - $node_payment_rcount,
+                        'created_at' => $payment_date,
+                    );
+                    $wpdb->insert($this->tableFinance, $paymentCData);
+                } else {
+                    $updateSql .= " SET left_node_count =  left_node_count - " . $node_payment_lcount;
+                    $updateSql .= ",right_node_count=right_node_count - " . $node_payment_rcount;
+                    $updateSql .= ",active_level= " . $higher_Level;
+                }
+
+
+                $updateSql .= "  WHERE aid='" . $agent->aid . "'";
+                $update_l = $wpdb->query($updateSql);
+                ff_filelog('addPayment', 'UPDATEQuery:' . $updateSql);
             }
         }
         return $last_inserted_id;

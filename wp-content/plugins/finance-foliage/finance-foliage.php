@@ -45,6 +45,7 @@ if (!defined('RWMB_VER')) {
 define('FINANCE_FOLIGE_DIR', __DIR__);
 define('FINANCE_FOLIGE_DIR_URL', plugin_dir_url(__FILE__));
 define('FINANCE_CIRCLE', array('left'=>15,'right'=>15));
+date_default_timezone_set('Asia/Dhaka');
 //Debug custom function
 function pprint($data) {
     echo '<pre>';
