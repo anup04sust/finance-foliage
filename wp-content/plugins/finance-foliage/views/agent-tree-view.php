@@ -79,10 +79,10 @@ if (!empty($agent_id)):
                                     <a href="<?php echo $agent_url . '?view=info&node=' . $agent->ID ?>" class="btn btn-sm btn-outline-info"><i class="fas fa-info mr-2"></i> View info</a>
                                 </div>
                             </div>
-                            <?php $level = ff_get_agaent_level($agent); ?>
+                          
                             <div class="ribbon-wrapper ribbon-lg">
-                                <div class="ribbon bg-info">
-                                    Level <?php echo @$level['level']; ?>
+                                <div class="ribbon <?php echo ($agent->active_circle > 0) ? 'bg-danger' : 'bg-info'; ?>">
+                                     <?php echo sprintf('C%1$s L%2$s',$agent->active_circle,$agent->active_level);?>
                                 </div>
                             </div> 
                         </div>
@@ -142,7 +142,7 @@ if (!empty($agent_id)):
                     </div>
                     <div class="ribbon-wrapper ribbon-lg">
                         <div class="ribbon bg-warning">
-                            Level <span class="level-number">0</span></div>
+                           <span class="level-number">0</span></div>
                     </div>
                 </div>
             </div>

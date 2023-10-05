@@ -52,10 +52,10 @@ if (!empty($agent_id)):
                         <!-- /.row -->
 
                     </div>
-                    <?php $level = ff_get_agaent_level($agent); ?>
+
                     <div class="ribbon-wrapper ribbon-lg">
-                        <div class="ribbon bg-info">
-                            Level <?php echo @$level['level']; ?>
+                        <div class="ribbon <?php echo ($agent->active_circle > 0) ? 'bg-danger' : 'bg-info'; ?>">
+                            <?php echo sprintf('C%1$s L%2$s', $agent->active_circle, $agent->active_level); ?>
                         </div>
                     </div> 
                 </div>
@@ -67,7 +67,7 @@ if (!empty($agent_id)):
             <div class="col-sm-12">
                 <div class="card card-info">
                     <div class="card-body">
-                        <table id="example1" class="table table-bordered table-striped">
+                        <table id="example1" class="table table-bordered table-striped generale-datatable">
                             <thead>
                                 <tr>
                                     <th style="width: 20px">Agent ID</th>
@@ -76,7 +76,7 @@ if (!empty($agent_id)):
                                     <th style="width: 15px">Left</th>
                                     <th style="width: 15px">Right</th>
                                     <th style="width: 30px">Level</th>
-                                    <th style="width: 30px">Amount</th>
+                                    <th style="width: 30px">Circle</th>
                                     <th style="width: 40px">Registered</th>
                                 </tr>
                             </thead>
@@ -90,8 +90,8 @@ if (!empty($agent_id)):
                 </div>
             </div>
             <?php
-             
         endif;
         ?>
     </div>
-<?php endif;
+    <?php
+ endif;

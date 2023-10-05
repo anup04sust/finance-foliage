@@ -92,7 +92,7 @@ class Agents {
         wp_die();
     }
 
-    private function addAgent($user_data) {
+    private function addAgent($user_data, $entry_type = "node") {
         global $wpdb;
         $ref = $wpdb->get_row("SELECT aid FROM " . $this->tableAlince . " WHERE aid='" . $user_data['slno'] . "'");
         if (empty($ref)) {
@@ -117,7 +117,7 @@ class Agents {
             ff_filelog('addAgent Update ', $user_data['slno']);
         }
         if (!empty($user_data['referral']) && !empty($user_data['wing'])) {
-            $response = $this->updateReferral($user_data['referral'], $user_data['wing'], $user_data['slno']);
+            $response = $this->updateReferral($user_data['referral'], $user_data['wing'], $user_data['slno'], $entry_type);
             ff_filelog('addNew updateReferral', $response);
             return array('status' => true, 'msg' => 'Agent added at level:' . $response);
         } else {
@@ -228,8 +228,9 @@ class Agents {
         }
     }
 
-    private function updateReferral($referral, $wing, $alliance_id) {
+    private function updateReferral($referral, $wing, $alliance_id, $entry_type) {
         global $wpdb;
+        $level_count = 0;
         $ref = $wpdb->get_row("SELECT aid FROM " . $this->tableAlince . " WHERE aid='" . $referral . "'");
         if (empty($ref)) {
             $referral_id = $wpdb->insert($this->tableAlince, array(
@@ -250,10 +251,12 @@ class Agents {
                 'right_node' => $alliance_id), array('aid' => $referral));
             ff_filelog('addNew updateReferral R', $referral . '-' . $alliance_id);
         }
-        $level_count = $this->updateNodeCount($referral, $wing, $alliance_id);
-        $wpdb->update($this->tableAlince, array(
-            'update_status' => 1), array('aid' => $alliance_id));
-        ff_filelog('addNew updateNodeCount', $level_count);
+        if ($entry_type != 'csv') {
+            $level_count = $this->updateNodeCount($referral, $wing, $alliance_id);
+            $wpdb->update($this->tableAlince, array(
+                'update_status' => 1, 'update_sync' => 1), array('aid' => $alliance_id));
+            ff_filelog('addNew updateNodeCount', $level_count);
+        }
         //ff_filelog('addNew updateNodeCount2', serialize($level_count));
 
         return $level_count;
@@ -278,7 +281,7 @@ class Agents {
         $node_referral = $wpdb->get_row("SELECT parent_node,spos FROM " . $this->tableAlince . " WHERE  aid='" . $referral . "'");
 
         if (!empty($node_referral)) {
-            $level = $this->updateNodeCount($node_referral->parent_node, $node_referral->spos, $level++);
+            $level = $this->updateNodeCount($node_referral->parent_node, $node_referral->spos, ++$level);
         }
         return $level;
     }
@@ -389,8 +392,7 @@ class Agents {
                 $count++;
             }
         }
-        pprint(serialize($agentsRow));
-        die($agentsRow);
+
         if (empty($_POST['import-btn'])) {
 
             echo wp_json_encode(array('status' => 200, 'row_count' => count($agentsRow)));
@@ -417,8 +419,8 @@ class Agents {
                 $user_data['created_at'] = strtotime($created_at);
                 $user_data['slno'] = trim($sl_no);
                 ff_filelog('importCsv', serialize($user_data));
-               // $create_user = $this->addWpUser($user_data);
-                $create_user = $this->addAgent($user_data);
+                // $create_user = $this->addWpUser($user_data);
+                $create_user = $this->addAgent($user_data, 'csv');
                 ff_filelog('importCsv wp user', serialize($create_user));
                 if ($create_user['status']) {
 
@@ -427,93 +429,52 @@ class Agents {
                     $import_status['fail'] += 1;
                 }
             }
+            $this->syncAgents('allsync');
+            //$this->syncAgents('active');
             echo wp_json_encode(array('status' => 200, 'row_count' => sprintf('Success:%s Fail:%s', $import_status['success'], $import_status['fail'])));
         }
         wp_die();
     }
 
-    public function syncAgents() {
+    public function syncAgents($sync_status = null, $sync_reset = 0) {
         $request_stime = strtotime('now');
-        $sync_status = esc_attr($_POST['sync_status']);
-
+        $sync_status = !empty($_POST['sync_status']) ? esc_attr($_POST['sync_status']) : $sync_status;
+        $sync_reset = !empty($_POST['resetall']) ? esc_attr($_POST['resetall']) : $sync_reset;
+        $response = [];
+        global $wpdb;
         if ($sync_status === 'allsync') {
 
-            global $wpdb;
-            $sync_reset = esc_attr(@$_POST['resetall']);
-            if (!empty($sync_reset)) {
-                $updated = $wpdb->query("UPDATE " . $this->tableAlince . " SET all_node_count_left = '0',all_node_count_right = '0', update_status = '0'");
-            }
-            $nodes = $wpdb->get_results("SELECT aid,parent_node,spos FROM " . $this->tableAlince . " WHERE update_status='0' LIMIT 0,50");
+            $updated = $wpdb->query("UPDATE " . $this->tableAlince . " SET all_node_count_left = 0,all_node_count_right = 0, update_status = 0");
 
-            $nodeLevel = 0;
-            if (!empty($nodes)) {
-                foreach ($nodes as $key => $node) {
-                    ff_filelog('-syncAgents-:', $node->aid, '-' . $key);
-                    $nodeLevel = $this->updateSyncCount($node->parent_node, $node->spos, $node->aid);
-                    $update = $wpdb->query("UPDATE " . $this->tableAlince . " SET update_status = '1'  WHERE aid='" . $node->aid . "'");
-                }
-            }
-            ff_filelog('-syncAgents-:', sprintf('Total node update %s', $nodeLevel));
+            ff_filelog('-syncAgents-:set hand 0:', $updated);
+            $nodeLevel = $this->syncGlobalHands();
             $response = [
                 'status' => 200,
                 'msg' => sprintf('Total node update %s', $nodeLevel),
                 'progress' => get_sync_progress()
             ];
-
-            echo wp_json_encode($response);
         } else if ($sync_status === 'active') {
-
-            global $wpdb;
-            $sync_reset = esc_attr(@$_POST['resetall']);
-            if (!empty($sync_reset)) {
-                $updated = $wpdb->query("UPDATE " . $this->tableAlince . " SET left_node_count = 0,right_node_count = 0,active_level=0,active_circle=0, update_sync = '0'");
-            }
-            $nodes = $wpdb->get_results("SELECT aid,parent_node,spos FROM " . $this->tableAlince . " WHERE update_sync='0' LIMIT 0,50");
-
-            $nodeLevel = 0;
-            if (!empty($nodes)) {
-                foreach ($nodes as $key => $node) {
-                    ff_filelog('-syncAgents update_sync-:', $node->aid, '-' . $key);
-                    $nodeLevel = $this->updateActiveSyncCount($node->parent_node, $node->spos, $node->aid);
-                    $update = $wpdb->query("UPDATE " . $this->tableAlince . " SET update_sync = '1'  WHERE aid='" . $node->aid . "'");
-                }
-            }
-           
-            $progress = get_sync_new_progress();
-            ff_filelog('-syncAgents-:', sprintf('get_sync_new_progress %s', $progress));
-            if ($progress == 100) {
-                $paidLeveles = $wpdb->get_results("SELECT aid, left_n , right_n, level FROM " . $this->tableFinance . " ORDER BY level ASC");
-               
-                if (!empty($paidLeveles)) {
-                    foreach ($paidLeveles as $agent) {
-                        //$query = "UPDATE " . $this->tableAlince . " SET left_node_count = left_node_count - " . $agent->left_n . ",right_node_count = right_node_count-" . $agent->right_n . ",active_level=" . $agent->level . " WHERE aid='" . $agent->aid . "'";
-
-                        $updateSql = "UPDATE " . $this->tableAlince;
-                        $updateSql .= " SET left_node_count =  left_node_count - " . $agent->left_n;
-                        $updateSql .= ",right_node_count=right_node_count - " . $agent->right_n;
-                        if ($agent->level == 4) {
-                            $updateSql .= ",active_level= 0";
-                            $updateSql .= ",active_circle=active_circle +1";
-                        }
-
-
-                        $updateSql .= "  WHERE aid='" . $agent->aid . "'";
-                        $update_l = $wpdb->query($updateSql);
-
-                        ff_filelog('-syncAgents Update:', $update_l . '-' . $updateSql);
-                        
-                    }
+            //New agents synchronization
+            $updated = $wpdb->query("UPDATE " . $this->tableAlince . " SET left_node_count = all_node_count_left,right_node_count = all_node_count_right, update_sync = 1, active_level=0,active_circle=0");
+            $syncQuery = "SELECT aid  FROM " . $this->tableFinance . " GROUP BY aid";
+            $payments = $wpdb->get_results($syncQuery);
+            if (!empty($payments)) {
+                foreach ($payments as $node) {
+                    $this->syncPaidNodes($node);
                 }
             }
             $response = [
                 'status' => 200,
-                'msg' => sprintf('Total node update %s', $nodeLevel),
+                'msg' => sprintf('Total node update %s', count($payments)),
                 'progress' => get_sync_new_progress()
             ];
-
-            echo wp_json_encode($response);
         }
-        wp_die();
+        if (!empty($_POST['action']) && $_POST['action'] == 'sync_agents') {
+            echo wp_json_encode($response);
+            wp_die();
+        } else {
+            return $response;
+        }
     }
 
     private function resetAgentsLevel($sdate) {
@@ -626,5 +587,68 @@ class Agents {
         }
         echo wp_json_encode(array('status' => 200, 'hasError' => $hasError, 'report' => $report));
         wp_die();
+    }
+
+    public function syncGlobalHands() {
+        ff_filelog('-syncGlobalHands-:start', strtotime('now'));
+        global $wpdb;
+        $childAgentsQuery = "SELECT aid, parent_node, spos FROM " . $this->tableAlince . " ORDER BY ID DESC";
+        $childAgents = $wpdb->get_results($childAgentsQuery);
+        $count = 0;
+        if (!empty($childAgents)) {
+            foreach ($childAgents as $agent) {
+                $tl = $this->updateAllHands($agent->parent_node, $agent->spos, $childAgents);
+                $wpdb->query("UPDATE " . $this->tableAlince . " SET update_status=1  WHERE aid='" . $agent->aid . "'");
+                $count++;
+            }
+        }
+        return $count;
+    }
+
+    public function updateAllHands($parent, $wing, $agents, $level = 0) {
+
+        if (empty($parent)) {
+            return $level;
+        }
+
+        global $wpdb;
+        if (!empty($wing) && $wing === 'L') {
+            $wpdb->query("UPDATE " . $this->tableAlince . " SET all_node_count_left =  all_node_count_left + 1  WHERE aid='" . $parent . "'");
+        } else if (!empty($wing) && $wing === 'R') {
+            $wpdb->query("UPDATE " . $this->tableAlince . " SET all_node_count_right =  all_node_count_right + 1  WHERE aid='" . $parent . "'");
+        }
+
+        $node_referral = ff_getAgent($agents, $parent);
+        ff_filelog('-updateAllHands-:', $node_referral->aid . '-' . $node_referral->parent_node . '-' . $node_referral->spos . '-' . $level);
+        if (!empty($node_referral)) {
+            $level = $this->updateAllHands($node_referral->parent_node, $node_referral->spos, $agents, ++$level);
+        }
+        return $level;
+    }
+
+    public function syncPaidNodes($node) {
+        global $wpdb;
+        $nodeLevels = $wpdb->get_results("SELECT * FROM " . $this->tableFinance . " WHERE aid='" . $node->aid . "' ORDER BY created_at ASC,level ASC");
+        $maxCircle = 0;
+        $maxLevel = 0;
+        $nodeLeft = 0;
+        $nodeRight = 0;
+        foreach ($nodeLevels as $payment) {
+            $maxLevel = $payment->level;
+            $nodeLeft += $payment->left_n;
+            $nodeRight += $payment->right_n;
+            if ($payment->level == 4) {
+                $maxCircle += 1;
+                $maxLevel = 0;
+            }
+        }
+        $updateQuery = "UPDATE " . $this->tableAlince . " SET left_node_count = left_node_count - " . $nodeLeft;
+        $updateQuery .= ", right_node_count = right_node_count - " . $nodeRight;
+        $updateQuery .= ", active_level = " . $maxLevel;
+        $updateQuery .= ", active_circle = " . $maxCircle;
+        $updateQuery .= " WHERE aid='" . $node->aid . "'";
+
+        $status = $wpdb->query($updateQuery);
+        ff_filelog('-syncPaidNodes-:[' . $status . ']', $updateQuery);
     }
 }

@@ -78,13 +78,16 @@ function ff_get_agaent_level($agent_info) {
         $left = 0;
         $right = 0;
         foreach ($finance_levels as $settings) {
-            $left += $settings['left_node'];
-            $right += $settings['right_node'];
-            if ($agent_info->left_node_count >= $settings['left_node'] && $agent_info->right_node_count >= $settings['right_node'] && $settings['level'] > $paid_level->active_level) {
-                $response = array(
-                    'level' => $settings['level'],
-                    'amount' => $settings['level_amount']
-                );
+            if ($settings['level'] > $paid_level->active_level) {
+
+                $left += $settings['left_node'];
+                $right += $settings['right_node'];
+                if ($agent_info->left_node_count >= $left && $agent_info->right_node_count >= $right) {
+                    $response = array(
+                        'level' => $settings['level'],
+                        'amount' => $settings['level_amount']
+                    );
+                }
             }
         }
     }
@@ -103,17 +106,20 @@ function ff_financial_level($agent_info) {
         $paid_level = $wpdb->get_row('SELECT active_level FROM ' . $wpdb->prefix . 'alliance' . ' WHERE aid="' . $agent_info->aid . '"');
 
         foreach ($finance_levels as $settings) {
-            $left += $settings['left_node'];
-            $right += $settings['right_node'];
+            if ($settings['level'] > $paid_level->active_level) {
 
-            if ($agent_info->left_node_count >= $left && $agent_info->right_node_count >= $right && $settings['level'] > $paid_level->active_level) {
+                $left += $settings['left_node'];
+                $right += $settings['right_node'];
 
-                $response[$settings['level']] = array(
-                    'level' => $settings['level'],
-                    'amount' => $settings['level_amount'],
-                    'left' => $settings['left_node'],
-                    'right' => $settings['right_node'],
-                );
+                if ($agent_info->left_node_count >= $left && $agent_info->right_node_count >= $right) {
+
+                    $response[$settings['level']] = array(
+                        'level' => $settings['level'],
+                        'amount' => $settings['level_amount'],
+                        'left' => $settings['left_node'],
+                        'right' => $settings['right_node'],
+                    );
+                }
             }
         }
     }
@@ -156,7 +162,8 @@ function ff_generate_tree_array($agent_root) {
         'right' => $rightArray,
         'created_at' => $nodes->created_at,
         'created_str' => date("D jS, M Y", $nodes->created_at),
-        'level' => ff_get_agaent_level($nodes)
+        'level' => $nodes->active_level,
+        'circle' => $nodes->active_circle
     ];
 }
 
@@ -176,7 +183,8 @@ function ff_generateHtmlTree($nodes, $tree_level = 0) {
             'all_node_count_left' => $nodes['all_node_count_left'],
             'all_node_count_right' => $nodes['all_node_count_right'],
             'created_str' => $nodes['created_str'],
-            'level' => $nodes['level']
+            'level' => $nodes['level'],
+            'circle' => $nodes['circle']
         );
 
         if ($bill_duration['bill_type'] === 'daily') {
@@ -232,8 +240,8 @@ function ff_get_treetable($nodes) {
         $html .= '<td>' . $nodes['node'] . '</td>';
         $html .= '<td>' . $nodes['left_node_count'] . '</td>';
         $html .= '<td>' . $nodes['right_node_count'] . '</td>';
-        $html .= '<td>' . $nodes['level']['level'] . '</td>';
-        $html .= '<td>' . $nodes['level']['amount'] . '</td>';
+        $html .= '<td>' . $nodes['level'] . '</td>';
+        $html .= '<td>' . $nodes['circle'] . '</td>';
         $html .= '<td>' . date("D jS, M Y", $nodes['created_at']) . '</td>';
 
         $html .= '</tr>';
@@ -366,7 +374,7 @@ function ff_get_bill_duration($current_date = '') {
 function ff_get_chield_agents($root, $response = array()) {
     global $wpdb;
     $table_name = $wpdb->prefix . 'alliance';
-    $response[$root->ID] = $root;
+    $response[$root->aid] = $root;
     if (!empty($root->left_node)) {
         $left_node = $wpdb->get_row('SELECT * FROM ' . $table_name . ' WHERE aid="' . $root->left_node . '"');
         $response = ff_get_chield_agents($left_node, $response);
@@ -414,4 +422,12 @@ function get_sync_new_progress() {
     }
     $persent = (($sync_count + $none_sync_status) > 0) ? (($sync_count * 100) / ($sync_count + $none_sync_status)) : 0;
     return ceil($persent);
+}
+
+function ff_getAgent($agentObj, $agentId) {
+    foreach ($agentObj as $agent) {
+        if ($agent->aid == $agentId) {
+            return $agent;
+        }
+    }
 }

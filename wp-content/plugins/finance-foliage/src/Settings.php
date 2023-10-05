@@ -228,6 +228,13 @@ class Settings {
                 FINANCE_FOLIGE_VER,
                 true
         );
+        wp_enqueue_script(
+                'ff-chart-script',
+                FINANCE_FOLIGE_DIR_URL . 'assets/js/ff-chart.js',
+                array('ff-dashboard-script'),
+                FINANCE_FOLIGE_VER,
+                true
+        );
         wp_localize_script('ff-dashboard-script', 'financeFoliage',
                 array(
                     'ajaxurl' => admin_url('admin-ajax.php'),

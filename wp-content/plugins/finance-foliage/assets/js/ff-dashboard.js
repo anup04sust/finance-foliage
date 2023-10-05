@@ -1,83 +1,7 @@
 'use strict';
 (function ($) {
     $(document).ready(function () {
-//        if ($('#donutChart').length > 0) {
-//            var donutChartCanvas = $('#donutChart').get(0).getContext('2d');
-//            var _donutData = {
-//                labels: donutData.labels,
-//                datasets: [
-//                    {
-//                        data: donutData.datasets.data,
-//                        backgroundColor: donutData.datasets.backgroundColor,
-//                    }
-//                ]
-//            };
-//            var donutOptions = {
-//                maintainAspectRatio: false,
-//                responsive: true,
-//            };
-//            //Create pie or douhnut chart
-//            // You can switch between pie and douhnut using the method below.
-//
-//            new Chart(donutChartCanvas, {
-//                type: 'pie',
-//                data: _donutData,
-//                options: donutOptions
-//            });
-//
-//
-//        }
-        //-------------
-        //- BAR CHART -
-        //-------------
-//        if ($('#barChart').length > 0) {
-//            console.log(weekDayRegeistered);
-//            var areaChartData = {
-//                labels: ['Thursdays', 'Fridays', 'Saturdays', 'Sundays', 'Mondays', 'Tuesdays', 'Wednesdays'],
-//                datasets: [
-//                    {
-//                        label: 'Current week',
-//                        backgroundColor: 'rgba(60,141,188,0.9)',
-//                        borderColor: 'rgba(60,141,188,0.8)',
-//                        pointRadius: false,
-//                        pointColor: '#3b8bba',
-//                        pointStrokeColor: 'rgba(60,141,188,1)',
-//                        pointHighlightFill: '#fff',
-//                        pointHighlightStroke: 'rgba(60,141,188,1)',
-//                        data: weekDayRegeistered.current_week
-//                    },
-//                    {
-//                        label: 'Previous week',
-//                        backgroundColor: 'rgba(210, 214, 222, 1)',
-//                        borderColor: 'rgba(210, 214, 222, 1)',
-//                        pointRadius: false,
-//                        pointColor: 'rgba(210, 214, 222, 1)',
-//                        pointStrokeColor: '#c1c7d1',
-//                        pointHighlightFill: '#fff',
-//                        pointHighlightStroke: 'rgba(220,220,220,1)',
-//                        data: weekDayRegeistered.prev_week
-//                    },
-//                ]
-//            };
-//            var barChartCanvas = $('#barChart').get(0).getContext('2d');
-//            var barChartData = $.extend(true, {}, areaChartData);
-//            var temp0 = areaChartData.datasets[0];
-//            var temp1 = areaChartData.datasets[1];
-//            barChartData.datasets[0] = temp1;
-//            barChartData.datasets[1] = temp0;
-//
-//            var barChartOptions = {
-//                responsive: true,
-//                maintainAspectRatio: false,
-//                datasetFill: false
-//            };
-//
-//            new Chart(barChartCanvas, {
-//                type: 'bar',
-//                data: barChartData,
-//                options: barChartOptions
-//            });
-//        }
+
         if ($('#fincance-report-table').length > 0) {
 
             $("#fincance-report-table").DataTable({
@@ -125,6 +49,8 @@
                             }
                         } else {
                             alert(res.msg);
+                            loader.addClass('d-none');
+                            btnSubmit.prop('disabled', false);
                         }
 
                     }
@@ -364,12 +290,18 @@
 
                 var nodeJson = $(this).attr('data-all');
                 var nodeData = JSON.parse(atob(nodeJson));
+                
                 $('#modal-node-details .n-name').text(nodeData.node);
                 $('#modal-node-details .n-aid').text(nodeData.node_aid);
                 $('#modal-node-details .ln-count').text(nodeData.all_node_count_left + '|' + nodeData.left_node_count);
                 $('#modal-node-details .rn-count').text(nodeData.all_node_count_right + '|' + nodeData.right_node_count);
                 $('#modal-node-details .date-registered').text(nodeData.created_str);
-                $('#modal-node-details .level-number').text(nodeData.level.level);
+                $('#modal-node-details .level-number').text('C'+nodeData.circle+' L'+nodeData.level);
+                if(nodeData.circle > 0){
+                   $('#modal-node-details .level-number').parent('.ribbon').removeClass('bg-warning').addClass('bg-danger');
+                }else{
+                     $('#modal-node-details .level-number').parent('.ribbon').removeClass('bg-danger').addClass('bg-warning');
+                }
                 $('#modal-node-details').modal('show');
                 console.log('A', e);
                 return false;
@@ -488,50 +420,26 @@
                 });
                 return false;
             });
+            $('#csv-agents').on('change', function () {
+                $('#csv-import-wrap').fadeOut('slow');
+                $('#csv-import-wrap .load-spin .spin-img').addClass('d-none');
+                $('#form-import-new-agent .btn').prop('disabled', false);
+            });
         }
         if ($('form.agent-sync-form').length > 0) {
             $('#sync-date-picker').datetimepicker({
                 format: 'YYYY-MM-DD'
             });
             $('#message-wrap').fadeOut();
-            $('#active-sync,#custom-sync').on('submit', function (e) {
-                $('#message-wrap').text('');
-                var formData = $(this).serialize();
-                var _btn = $(this).find('.btn');
-                var _loader = $(this).find('.spin-img');
-                _loader.removeClass('d-none');
-                _btn.prop('disabled', true);
-                $.ajax({
-                    type: "POST",
-                    data: formData,
-                    dataType: "JSON",
-                    cache: false,
-                    url: financeFoliage.ajaxurl,
-                    success: function (res)
-                    {
-                        if (res.status === 200) {
-                            _loader.addClass('d-none');
-                            _btn.prop('disabled', false);
-                            if (res.data) {
-                                console.dir(res.data);
-                            }
-                            $('#message-wrap').text(res.msg).fadeIn('slow');
-                        } else {
-                            location.reload();
-                        }
 
-
-                    }
-                });
-
-                return false;
-            });
             $('#all-agent-sync, #all-agent-sync-current').on('submit', function (e) {
                 $('#message-wrap').text('');
                 var syncForm = $(this);
                 var formData = syncForm.serialize();
                 var _btn = syncForm.find('.btn');
                 var _loader = syncForm.find('.spin-img');
+                syncForm.find('.progress-bar').width('0%');
+                syncForm.find('.sync-progress-label').text('Progress 0%');
                 _loader.removeClass('d-none');
                 _btn.prop('disabled', true);
                 $.ajax({
@@ -548,10 +456,13 @@
                             syncForm.find('.progress-bar').width(res.progress + '%');
                             syncForm.find('.sync-progress-label').text('Progress ' + res.progress + '%');
                         } else {
-                            location.reload();
+                            //location.reload();
                         }
 
 
+                    },
+                    error: function (request, status, error) {
+                        //location.reload();
                     }
                 });
 
@@ -632,5 +543,6 @@
                 $(item).prop('checked', tergetState);
             });
         });
+        $('table.generale-datatable').DataTable({});
     });
 })(jQuery);

@@ -24,6 +24,7 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
 
     if (!empty($_GET['front-agent']) && $_GET['front-agent'] != 'all') {
         $font_agent = $wpdb->get_row('SELECT * FROM ' . $table_alliance . ' WHERE aid="' . esc_sql($_GET['front-agent']) . '"');
+       
         $agents = ff_get_chield_agents($font_agent);
 
         $applied_filter['front-agent'] = $font_agent->user_name;
@@ -164,9 +165,10 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
                                     if (!empty($_GET['level']) && $_GET['level'] != 'all' && $level['level'] !== $_GET['level']) {
                                         continue;
                                     }
-                                    if ($level['level'] === 0) {
+                                    if (empty($level['level'])) {
                                         continue;
                                     }
+                                  
                                     $flevel = ff_financial_level($agent);
                                     if (!empty($flevel)) {
                                         foreach ($flevel as $l) {
@@ -175,7 +177,10 @@ if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['
                                             $level_size[] = $l['level'];
                                         }
                                     }
-
+//                                    pprint($agent->user_name);
+//                                    pprint($level);
+//                                    pprint($flevel);
+                                    
 
                                     $html = '<tr class="data-row data-dispactch" data-aid="' . $agent->aid . '" >';
                                     $html .= '<td for="checkme-' . $agent->aid . '"><div class="form-check"><input class="form-check-input dispatch-aid" type="checkbox" value="' . $agent->aid . '" name="dispatch[' . $index . ']" id="checkme-' . $agent->aid . '" /></div></td>';

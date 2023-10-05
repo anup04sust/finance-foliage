@@ -26,42 +26,37 @@ $reportQuery = "SELECT f.aid,SUM(f.amount) as total, GROUP_CONCAT(f.amount SEPAR
 $reportQuery .= " FROM " . $table_finance . " f ";
 
 $reportQuery .= " WHERE level !=0 ";
-if (!empty($_GET['date-range'])) {
-   
+if(!empty($_GET['payment_at']) && $_GET['payment_at'] != '0'){
+    $reportQuery .= " AND (f.created_at = " . esc_attr($_GET['payment_at']) . ")"; 
+}elseif (!empty($_GET['date-range'])) {
+
     $dateRange = explode('-', $_GET['date-range']);
     $bill_sdate = strtotime(trim($dateRange[0]));
     $bill_edate = strtotime(trim($dateRange[1]));
     $reportQuery .= " AND (f.created_at >= " . $bill_sdate . " AND f.created_at <= " . $bill_edate . ")";
-} else {
+}else {
     $reportQuery .= " AND (f.created_at >= " . $bill_sdate . " AND f.created_at <= " . $bill_edate . ")";
 }
 
-if(!empty($_GET['agent-id'])){
-     $reportQuery .= " AND f.aid =  '" . trim($_GET['agent-id']) . "'";
+if (!empty($_GET['agent-id'])) {
+    $reportQuery .= " AND f.aid =  '" . trim($_GET['agent-id']) . "'";
 }
+if (!empty($_GET['front-agent']) && $_GET['front-agent'] != 'all') {
+    $font_agent = $wpdb->get_row('SELECT * FROM ' . $table_alliance . ' WHERE aid="' . esc_sql($_GET['front-agent']) . '"');
 
+    $fronts_nodes = ff_get_chield_agents($font_agent);
+    if (!empty($fronts_nodes)) {
+        $reportQuery .= " AND f.aid IN('" . implode("','", array_keys($fronts_nodes)) . "')";
+    }
+}
+if (!empty($_GET['level']) && $_GET['level'] != 'all') {
+    $reportQuery .= " AND f.level =  " . $_GET['level'];
+}
 $reportQuery .= " GROUP BY f.aid,f.ptype ";
 
+$payments = $wpdb->get_results($reportQuery);
 
-//if (!empty($_GET['finance-filter']) && ($_GET['front-agent'] != 'all' || $_GET['date-range'] != '' || $_GET['agent-id'] != '')) {
-//
-//    if (!empty($_GET['front-agent']) && $_GET['front-agent'] != 'all') {
-//        $font_agent = $wpdb->get_row('SELECT * FROM ' . $table_alliance . ' WHERE aid="' . esc_sql($_GET['front-agent']) . '"');
-//        $agents = ff_get_chield_agents($font_agent);
-//
-//        $applied_filter['front-agent'] = $font_agent->user_name;
-//    } else if (!empty($_GET['agent-id'])) {
-//        $agents = $wpdb->get_results('SELECT * FROM ' . $table_alliance . ' WHERE aid="' . esc_sql($_GET['agent-id']) . '"');
-//        $applied_filter['agent-id'] = $_GET['agent-id'];
-//    } else {
-//        $agents = $wpdb->get_results('SELECT * FROM ' . $table_alliance . ' ORDER BY ID ASC');
-//    }
-//} else {
-//
-//   
-//}
- $payments = $wpdb->get_results($reportQuery);
- 
+$payment_dates = $wpdb->get_results("SELECT created_at FROM " . $table_finance . " GROUP BY created_at; ");
 ?>
 <div class="row">
     <div class="col-sm-12">
@@ -72,34 +67,34 @@ $reportQuery .= " GROUP BY f.aid,f.ptype ";
                         <div class="col-2">
                             <select name="front-agent" class="form-control">
                                 <option value="all">All Front Agent</option>
-<?php
-if (!empty($font_agents)):
-    foreach ($font_agents as $fa) {
-        $selected = (!empty($_GET['front-agent']) && $_GET['front-agent'] == $fa->aid) ? 'selected' : '';
-        echo sprintf('<option %3$s value="%2$s">%1$s</option>', $fa->user_name, $fa->aid, $selected);
-    }
-endif;
-?>
+                                <?php
+                                if (!empty($font_agents)):
+                                    foreach ($font_agents as $fa) {
+                                        $selected = (!empty($_GET['front-agent']) && $_GET['front-agent'] == $fa->aid) ? 'selected' : '';
+                                        echo sprintf('<option %3$s value="%2$s">%1$s</option>', $fa->user_name, $fa->aid, $selected);
+                                    }
+                                endif;
+                                ?>
                             </select>
                         </div>
                         <div class="col-2">
                             <select name="level" class="form-control">
                                 <option value="all">All Level</option>
-<?php
-if (!empty($foliage_settings['finance_foliage_levels'])):
-    foreach ($foliage_settings['finance_foliage_levels'] as $al) {
-        $selected = (!empty($_GET['level']) && $_GET['level'] == $al['level']) ? 'selected' : '';
-        echo sprintf('<option %3$s value="%2$s">%1$s</option>', 'LEVEL ' . $al['level'], $al['level'], $selected);
-    }
-endif;
-?>
+                                <?php
+                                if (!empty($foliage_settings['finance_foliage_levels'])):
+                                    foreach ($foliage_settings['finance_foliage_levels'] as $al) {
+                                        $selected = (!empty($_GET['level']) && $_GET['level'] == $al['level']) ? 'selected' : '';
+                                        echo sprintf('<option %3$s value="%2$s">%1$s</option>', 'LEVEL ' . $al['level'], $al['level'], $selected);
+                                    }
+                                endif;
+                                ?>
                             </select>
                         </div>
                         <div class="col-2">
                             <input name="agent-id" value="<?php echo @$_GET['agent-id'] ?>" class="form-control" placeholder="agent id"/>
                         </div>
 
-                        <div class="col-2">
+                        <div class="col-3 d-none">
 
                             <div class="input-group">
                                 <div class="input-group-prepend">
@@ -108,9 +103,26 @@ endif;
                                 <input data-sdate="<?php echo date('Y/m/d', $bill_sdate); ?>" data-edate="<?php echo date('Y/m/d', $bill_edate); ?>" type="text" class="form-control float-right" id="date-range" name="date-range">
                             </div>
                         </div>
+                        <?php if (!empty($payment_dates)): ?>
+                        
+                            <div class="col-2">
+                                 <div class="input-group">
+                                
+                                <select name="payment_at" class="form-control">
+                                    <option value="0">Select Date</option>
+                                    <?php
+                                    foreach ($payment_dates as $unix_date) {
+                                        $selected = (!empty($_GET['payment_at']) && $_GET['payment_at'] == $unix_date->created_at) ? 'selected' : '';
+                                        echo sprintf('<option %3$s value="%2$s">%1$s</option>', date('Y-m-d', $unix_date->created_at), $unix_date->created_at, $selected);
+                                    }
+                                    ?>
+                                </select>   
+                            </div>
+                                 </div>
+                                <?php endif; ?>
                         <div class="col-2">
                             <button type="submit" class="btn btn-info">Apply Filter</button>
-                           
+
                             <input type="hidden" name="finance-filter" value="on"/>
                         </div>
                     </div>
